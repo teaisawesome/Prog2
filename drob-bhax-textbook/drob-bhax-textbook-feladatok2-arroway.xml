@@ -584,7 +584,7 @@ public class Main {
 }
         ]]>
         </programlisting>
-	<para>A felti kód NullPointerException kivételt ad, mert name változó egy nullpointer és hasonlítani akarjuk a "John" karakterlánchoz, ami nem megengedett.</para>
+	<para>A felti kód NullPointerException kivételt ad, mert name változó egy nullpointer és hasonlítani akarjuk a "John" konstanst, ami nem megengedett.</para>
 <figure>
             <title>NullPointerException, ha nem használjuk a Yoda Conditiont.</title>
             <mediaobject>
@@ -593,7 +593,7 @@ public class Main {
                 </imageobject>
             </mediaobject>
         </figure>
-	<para>Ha megfordítjuk a feltétel sorrendjét és használjuk a Yoda conditiont akkor már jó.</para>
+	<para>Ha megfordítjuk a feltétel sorrendjét és használjuk a Yoda conditiont akkor már jó. String literálhoz már hasonlíthatunk null értéket, ami jelen esetbe false értéket adna. Ezzel a módszerrel különféle hibákat tudunk kiküszöbölni, úgy mint a értékadás-hasonlítás vagy a null értékekből eredendő hibák.</para>
 <programlisting language="java">
 <![CDATA[
 public class Main
@@ -611,7 +611,7 @@ public class Main
 </section>
 <section>
 <title>Kódolás from scratch</title>
-<para>Feladat volt a BBP (Bailey-Borwein-Plouffe) algoritmust a Pi hexa jegyeinek számolását végző osztály megírása egy <link xlink:href="https://www.davidhbailey.com//dhbpapers/bbp-alg.pdf">tudományos közlemény</link> alapján. A közleményt illetve a megadott példákat felhasználva sikerült megírni az algoritmust: </para>
+<para>Feladat volt a BBP (Bailey-Borwein-Plouffe) algoritmust a Pi hexa jegyeinek számolását végző osztály megírása egy <link xlink:href="https://www.davidhbailey.com//dhbpapers/bbp-alg.pdf">tudományos közlemény</link> alapján. A pdf-ben sok matematika képlet illetve leírás szerepelt. Ezek megértése időigényes. A közleményt illetve a megadott példákat felhasználva sikerült megírni az algoritmust: </para>
 <programlisting language="java">
 <![CDATA[
 package com.company;
