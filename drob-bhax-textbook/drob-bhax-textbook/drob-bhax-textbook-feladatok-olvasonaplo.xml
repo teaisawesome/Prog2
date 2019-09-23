@@ -1,0 +1,164 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+    <info>
+        <title>Helló, Olvasónapló!</title>
+        <keywordset>
+            <keyword/>
+        </keywordset>
+        <cover>
+            <para>
+                Programozás tankönyvek rövid olvasónaplói.
+            </para>
+        </cover>
+    </info>
+    <section>
+        <title>Java illetve C++ összehasonlítása</title>
+        <para>
+		A feladat a C++ könyv illetve a Java I-II könyv összehasonlítása volt. Az esszémben pár oldalas formában összefoglalom, hogy milyen eltérő nyelvi megvalósításokat találhatunk, mint Java, mint C++ oldalon. Elsőkörben a főbb különbségeket tárgyaljuk a két nyelv között majd áttérek az egyéb szintaktikai, szemantikai különbségekre is.
+	</para>
+	<para>
+		Mindkét nyelv széles körben alkalmazható különböző feladatok, problémák megoldására. A C++ fő vonzereje, hogy lehetővé teszi a forrás szinten hordozható programok írását. Ez bővebben annyit takar, hogy egy másik gépen a megfelelő platform mellett a program ugyanolyan működéssel bír. A C++ forráskód gépi nyelvre konvertálódik így az csak az adott platformon fordul, ezt hívjuk platform-függő megvalósításnak. Ezzel szemben a Java egy úgynevezett JVM futtató környezetet használ, ami minden platformra egységes program futást eredményez. A java forráskódot a javac compiler egy java virtuális környezetben futtatható byte kóddá (.class) fordítja a programokat. A Java így tehát egy platform-független nyelv.
+
+	</para>
+<figure>
+            <title>Java compile</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/compiler.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+	<para>
+		A Java nyelvi szinten támogatja az egyes osztálykönyvtárakat így széles alkalmazási területet fed le, úgy mint a szálkezelés, GUI programozás, adatbázis elérés stb. A C++ hasonlóan támogatja ezen alkalmazásokat viszont jobban igénybe kell venni a külső, nem nyelvi szintű könyvtárakat.
+	</para>
+	<para>
+		A C++ nyelv az egyes objektumokat egy memóriaszegmensen elhelyezkedő bájtsorozatnak fogja fel, amiket a mutatók, referenciák segítségével könnyedén manipulálhatjuk a memóriában. Ezen esetben beszélünk statikus-, automatikus- és dinamikus memóriáról. A programozó legtöbbször a dinamikus memóriában “matat”, ide történik meg a helyfoglalás illetve az egyes felszabadítási mechanizmusok. Ezzel szemben a Java-ban nincs lehetőség közvetlenül elérni a memóriát, ahogyan a C++-ban tettük. Helyette hivatkozásokon keresztül érjük el a memória tartalmát. Ugyanezen témát érintve a destruktor-hívó mechanizmus hiányzik a Java-ban, helyette egy úgynevezett garbage-collector (szemétgyűjtő mechanizmus)  automatikusan menedzseli a memóriát. Ezen mechanizmus átveszi a programozótól a memória kezelés problémáját néhány előnyt és hátrányt hagyva maga után. Előnyei többek között a memóriaszemét eltakarítása, memóriaszivárgás megakadályozása és egyéb memória menedzselési feladatok automatikus elvégzése. Hátránya, hogy a szemétgyűjtés stop-the-world módon történik. Az összes Java szálat leállítja azért, hogy ne változzon a heap és a stack. Ez a leállítás sok párhuzamos felhasználás mellett nagymértékben rontja a teljesítményt. Az egyes szemétgyűjtő algoritmusok eltérőek lehetnek. (A garbage collector mechanizmusról pontosabb infókat a (<link xlink:href="http://www.jtechlog.hu/2011/12/30/java-memoriakezeles-szemetgyujto.html">http://www.jtechlog.hu/2011/12/30/java-memoriakezeles-szemetgyujto.html</link> oldalon olvastam).
+	</para>
+	<para>
+		A C++ nyelvben definiált primitív típusok pontos mérete és értéktartománya nem definiált. Ez a hatékony felhasználást célozza meg. Jó példa a char primitív típus (signed/unsigned) tulajdonsága vagy int (16/32/64 bit) mérete. A Java ezeknél szigorúbb szabályokat alkalmaz a primitív típusok definiálására. Mivel futási időben nem hozhatunk létre primitív változókat így a Java bevezette az úgynevezett primitív típusoknak megfelelő Csomagoló osztályokat. Ezek az osztályok tartalmaznak primitív típust fogadó konstruktort és primitív típusra konvertáló metódust valamint a főbb konstansokat. Főbb olyan típusra jellemző metódust és függvényt is definiálnak ezek az osztályok, amik segítik a velük való objektum szintű műveleteket.
+	</para>
+<figure>
+            <title>Java könyvből való típus összegző táblázat</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/tipusok.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+	<para>
+		Java-ban a logikai típushoz nem tartozik egész típusú  megfelelő. Pl.: A hamis ! = 0 vagy a igaz ! = 1. A C++-ban bátran tudunk konvertálni ezen két típus között.
+
+A Java nyelvben nem definiált a pointer így ennek megfelelően nem tudunk a C++-tól megszokott pointer vagy referencia szintaxist használni a dinamikus memória elérésére. Ezeket csak hivatkozásokon keresztül érhetjük el. Javaban a függvénymutatók helyett objektum-referenciákat, visszatérési értékeket, tömböket és interface-ket használunk.
+
+A C++-beli const kulcsszó definiált viszont nincs jelentése a Java-ban. Hasonló jelentéssel a final kulcsszó rendelkezik, amely az adattagok, metódusok változatlanságát illetve az osztályra vonatkozó származtatás tiltását jelenti. Sok osztály rendelkezik final minősítéssel ugyanígy az összes primitív típus Csomagoló osztálya is.
+
+	</para>
+	<para>
+		Az objektum orientált szemléletmódot mindkét nyelv támogatja viszont néhány eltérést találhatunk. A C++ többparadigmás (többértelmű) nyelv. Támogatja a procedurális programokat, bonyolult osztályhierachiákat, objektum orientált elveket, könyvtárakat. A Java nyelv ezzel szemben csak az objektum orientált paradigmát támogatja. Nincsenek globális változók, függvények csak osztály attribútumok, változók, constansok és metódusok. A C++-ban lehetőség van az egyszeres illetve többszörös öröklődésre. Java-ban nincs támogatva a többszörös öröklődés viszont interface-k segítenek megvalósítani azokat.
+	</para>
+<figure>
+            <title>Többszörös öröklődés</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/tobb.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+    </section>
+    <section>
+      <title>Python könyv feldolgozása</title>
+      <para>
+        A Python egy magasszintű programozási szkriptnyelv. 1990-ben Guido van Rossum hozta létre és mára szinte a programozási nyelvek listáján egyeduralkodóként van jelen. Fejlesztők számára számos tulajdonsággal rendelkezik. Magas szintű, dinamikus, objektumorientált és platformfüggetlen, ami nagyban hozzájárul a különböző szintű és összetettségű programok hatékony létrehozásához. Rengeteg csomagot tartalmaz amely segít a komolyabb problémák (pl. MI, gépitanulás, statisztika stb.) megoldásához. A programokhoz nem szükséges fordítási fázis, elegendő a forrást az értelmezőnek átdobni ami automatikusan futtatja az alkalmazást.
+      </para>
+      <para>
+        A nyelv sajátossága, hogy nem blokkokban gondolkodik, hanem behuzásalapú szintaxison. Az azonos behuzással rendelkező kódok egy csoportba tartoznak így alá/felé rendelést létrehozva. Továbbá nincs end-jel karakter (;) ami jelzi az utasítás végét.
+        Minden egyes sort úgynevezett tokenekre bont, amelyek között whitespace karakterek lehetnek. Lehetnek kulcsszavak, literálok stb. és ezeket az értelmező értelmezi.
+      </para>
+      <programlisting language="python">
+        <![CDATA[
+            if x > 5 :
+              print('hello world!')
+            print('not hello world!')
+        ]]>
+      </programlisting>
+    <para>
+	A Python nyelvbe nincsenek megadott típusok, minden adatot objektumok reprezentálnak. Értékek típusa futási időbe fogalmazódik meg. Ezen típusok lehetnek számok, karakterláncok, ennesek, listák, szótárak. Példa stringre:
+    </para>
+<programlisting language="python">
+        <![CDATA[
+            print u"Yesterday, Pete went %s" ("afk")
+        ]]>
+      </programlisting>
+	<para>
+		A típusoknál emlétett ennesek nem mások, mint tetszőleges objektumok gyűjteménye. Lényegében azonos vagy különböző értékeket tudunk tárolni benne. Zárójelek között megadjuk a tagokat:
+	</para>
+<programlisting language="python">
+        <![CDATA[
+            (5, "ketto", true)
+        ]]>
+      </programlisting>
+	<para>
+		Listákat szögletes zárójelek [.,.] között adjuk meg. Ezek ugyanúgy müködnek, mint a többi nyelvben. Hozzáfűzhetünk új elemeket is hozzá így dinamikusan növelve a méretét. Az elemeket indexükkel azonosítjuk. Példa a listákra: 
+	</para>
+<programlisting language="python">
+        <![CDATA[
+	    [3, 4, 5]
+
+            [5, "ketto", true]
+
+	    list(5, 4)
+        ]]>
+      </programlisting>
+ 	<para>
+		A könyvtárak (dictionary) kulcs érték párokat tárol. Lényegében egy kiterjesztett listáról beszélünk. Hasonlóan képzelhetjük el, mint PHP-ben az asszociatív tömböket. Kapcsos zárójelek között kettősponttal elválasztva adjuk meg az egyes elemeket.
+	</para>
+<programlisting language="python">
+        <![CDATA[
+	    {'a':1, 'b':9}
+        ]]>
+      </programlisting>
+	<para>
+		Pythonban léteznek globális és lokális változók. Ezeket egyenlőségjel segítségével inicializálhatjuk. Értékül bármit adhatjunk pl.: objektumokat, típusokat, függvényeket és így tovább.
+	</para>
+	<para>
+		A nyelv támogatja a már jól megszokott vezérlési szerkezeteket. Ilyen első alap szerkezet az elágazás vagyis az if. Ugyanúgy működik, mint más programozási nyelvekben csak a nyelvi tagolásra kell figyelni. Ez az alábbi módon néz ki:
+	</para>
+	<programlisting language="python">
+        <![CDATA[
+if c > 5:
+		print("asd")
+elif c < 5:
+		print("-asd")
+else:
+		print("5")
+        ]]>
+      </programlisting>
+	<para>If kulcsszó után megadjuk a feltételt. Ezután egy kettőspont választja el a "törzset" majd a sorbehúzás szerint végrehajtódik egy utasítás, ha a feltétel teljesül.</para>
+	<para>Ciklusok közül a for ciklust és a while ciklust említeném meg. A forral végigiterálhatunk egy listán vagy akár egy kulcs érték párokat használó könyvtáron is. for kulcsszó után egy változót adunk meg, amelyben az épp aktuális elemet tárolja ideiglenesen. Ezután egy in kulcsszó következik majd a lista. A while ciklus hasonlóan működik, mint a többi nyelvekben. While kulcsszó után egy feltétel következik. Ha a feltétel teljesük, akkor az alatta elhelyezkedő utasítás hajtódik végre.</para>
+	<programlisting language="python">
+        <![CDATA[
+characters = ["Fizz", "Thresh", "Pyke"]
+for x in characters
+	print x
+
+
+for key, value in dic.items():
+	print key, '-', value
+
+y = "cat"
+while (y == "cat"):
+	print "meow:3"
+        ]]>
+      </programlisting>
+<para>A könyv röviden kitér a Python-ban megtalálható objektumorientált eszközökre is. Osztályt az alábbi módon tudjuk definiálni:</para>
+<programlisting language="python">
+        <![CDATA[
+class Bill():
+	def Hello(self, say):
+		print "Hello", say
+        ]]>
+</programlisting>
+<para>Az osztályt a class kucslszóval tudjuk megadni. Utána következik az osztály neve illetve felsorolásképp az ősosztályok listája. Ezután behuzás szinten definiálhatjuk az utasításokat, konstruktorokat stb.</para>
+
+    </section>
+
+</chapter>

@@ -1,0 +1,713 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+    <info>
+        <title>Helló, Arroway!</title>
+        <keywordset>
+            <keyword/>
+        </keywordset>
+    </info>
+    <section>
+	<title>Az objektumorientált paradigma alapfoglamai. Osztály,
+objektum, példányosítás.</title>
+	<para>
+		Az objektumorientált programozás az objektumok osztályozásainak, kapcsolatainak és tulajdonságainak felhasználásával segíti a programfejlesztést. Objektum szinte bármilyen fogalom vagy elem lehet. Lehet egy fizikai objektum (egy fejlesztendő cég terméklistája) vagy épp egy kódon, programon belüli rész. Az attribútumok az objektummal kapcsolatban álló tulajdonságok vagy változók. A műveletek az objektum olyan metódusai, eljárásai vagy függvényei amelyek segítségével módosíthatunk meglévő objektumokon vagy új funkciókat képezhetünk a segítségükkel. Az objektumokon belüli adatokhoz kizárólag csak az objektumokon belül illetve metódusokon (interface) keresztül férhetünk hozzá. Továbbá az objektum nem létheti át saját hatáskörét magyarul minden objektumnak megvan a jól meghatározott feladatköre. Az objektumok osztályokba csoportosíthatók. Minden osztálynak megvan a maga tulajdonságai és műveletei. Új objektumot példányosításon keresztül hozhatunk létre. Ekkor egy osztály új objektumpéldánya jön létre.
+	</para>
+    </section>
+
+    <section>
+        <title>OO Szemlélet</title>
+        <para>
+          Ebben a részben a polártranszformációs normális generátort kellett megírni Java nyelven. Lényege, hogy egy polármódszerrel előállított számot ad vissza.
+          Ennek a matematika háttere nem érdekes, viszont a Java program része már annál inkább.
+          A program objektumorientált szemléletmóddal készült vagyis van benne osztály, attribútumok és metódusok.
+          Lényege, hogy a PolarGen osztály <function>boolean nincsTarolt</function> attribútuma határozza meg a <function>kovetkezo()</function> függvény double visszatérési értékét.
+          Ha nincs tárolt értékünk akkor két számot állítunk elő. Az egyiket eltároljuk egy változóban ebből következik, hogy a nincsTarol értéke módusul majd a másikkal visszatérünk.
+          Ha viszont van tárolt érték akkor egyszerűen azzal tér vissza a <function>kovetkezo()</function> függvény. A kód:
+        </para>
+        <programlisting language="java">
+        <![CDATA[
+        import static java.lang.System.*;
+
+
+        public class PolarGen
+        {
+            boolean nincsTarolt = true;
+            double tarolt;
+
+            public PolarGen()
+            {
+                nincsTarolt = true;
+            }
+
+            public double kovetkezo()
+            {
+                if(nincsTarolt)
+                {
+                    double u1, u2, v1, v2, w;
+                    do {
+                       u1 = Math.random();
+                       u2 = Math.random();
+                       v1 = 2 * u1 - 1;
+                       v2 = 2 * u2 - 1;
+                       w = v1 * v1 + v2 * v2;
+                    }
+                    while (w > 1);
+                    double r = Math.sqrt((-2 * Math.log(w)) / w);
+                    tarolt = r * v2;
+                    nincsTarolt = !nincsTarolt;
+                    return r * v1;
+                }
+                else
+                {
+                    nincsTarolt = !nincsTarolt;
+                    return tarolt;
+                }
+            }
+
+            public static void main(String[] args)
+            {
+                PolarGen pg = new PolarGen();
+                for (int i = 0; i < 10; i++)
+                {
+                    out.println(pg.kovetkezo());
+                }
+            }
+        }
+        ]]>
+        </programlisting>
+        <figure>
+            <title>PolarGen program eredménye</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/polgen1.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+        <para>Hasonló megoldás található az OpenJDK-ban a Random.class-ban. Különbség a <function>synchronized</function> kulcsszó. Lényege, hogy egy időben csak 1 szálon futhat a programkód ezzel megakadályozva a különöböző szálakon történő szimultán módosításokat.</para>
+        <figure>
+            <title>Random.class-ban lévő nextGaussian() függvény</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/polgen2.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+    </section>
+
+    <section>
+        <title>Homokozó</title>
+        <para>
+            Ebben a feladatban a C++ féle LZWBinfa-t kellett átírni Java nyelvre. A legtöbb függvényt könnyű volt átírni csak a pointereket és referenciákat kellett kiiírtani a kódból. Lényegi rész volt, hogy a működése ne változzon. A műküdést nem részletezném, mert már prog1-ről is rengetegszer feljött úgyhogy mindenkinek a "könyökén" jön ki. Java forráskód a Binfáról:
+        </para>
+<programlisting language="java">
+        <![CDATA[
+package lzwfa;
+
+import java.io.FileInputStream;
+
+public class Binfa
+{
+	public Binfa()
+	{
+		fa = gyoker;
+	}
+	
+	public void egyBitFeldolg(char b)
+	{
+		if(b == '0')
+		{
+			
+			if(fa.egyesGyermek() == null)
+			{
+				Csomopont uj = new Csomopont('0');
+				fa.ujNullasGyermek(uj);
+				fa = gyoker;
+			}
+			else
+			{
+				fa = fa.nullasGyermek();
+			}
+		}
+		else
+		{
+			if(fa.egyesGyermek() == null)
+			{
+				Csomopont uj = new Csomopont('1');
+				fa.ujEgyesGyermek(uj);
+				fa = gyoker;
+			}
+			else
+			{
+				fa = fa.egyesGyermek();
+			}
+		}
+	}
+	
+	public void kiir()
+	{
+		melyseg = 0;
+		kiir(gyoker, new java.io.PrintWriter(System.out));
+	}
+	
+	public void kiir(java.io.PrintWriter os)
+	{
+		melyseg = 0;
+		kiir(gyoker, os);
+	}
+	
+	class Csomopont
+	{
+		public Csomopont(char betu)
+		{
+			this.betu = betu;
+			balNulla = null;
+			jobbEgy = null;
+		};
+		
+		public Csomopont nullasGyermek()
+		{
+			return balNulla;
+		}
+		
+		public Csomopont egyesGyermek()
+		{
+			return jobbEgy;
+		}
+		
+		public void ujNullasGyermek(Csomopont gy)
+		{
+			balNulla = gy;
+		}
+		
+		public void ujEgyesGyermek(Csomopont gy)
+		{
+			jobbEgy = gy;
+		}
+		
+		public char getBetu()
+		{
+			return betu;
+		}
+		private char betu;
+		
+		private Csomopont balNulla = null;
+		private Csomopont jobbEgy = null;
+		
+	};
+	
+	private Csomopont fa = null;
+	
+	private int melyseg, atlagosszeg, atlagdb;
+	private double szorasosszeg;
+	
+	public void kiir(Csomopont elem, java.io.PrintWriter os)
+	{
+		if(elem != null)
+		{
+			++melyseg;
+			kiir(elem.egyesGyermek(), os);
+			for (int i = 0; i < melyseg; i++)
+			{
+				os.print("---");
+			}
+			os.print(elem.getBetu());
+			os.print("(");
+			os.print(melyseg - 1);
+			os.println(")");
+			kiir(elem.nullasGyermek(), os);
+			--melyseg;
+		}
+	}
+	
+	protected Csomopont gyoker = new Csomopont('/');
+	int maxMelyseg;
+	double atlag, szoras;
+	
+	public int getMelyseg()
+	{
+		melyseg = maxMelyseg = 0;
+		rmelyseg(gyoker);
+		return maxMelyseg - 1;
+	}
+	
+	public void rmelyseg(Csomopont elem)
+	{
+		if(elem != null)
+		{
+			++melyseg;
+			if(melyseg > maxMelyseg)
+			{
+				maxMelyseg = melyseg;
+			}
+			rmelyseg(elem.egyesGyermek());
+			rmelyseg(elem.nullasGyermek());
+			--melyseg;
+		}
+	}
+	
+	public double getAtlag()
+	{
+		melyseg = atlagosszeg = atlagdb = 0;
+		ratlag(gyoker);
+		atlag = ((double) atlagosszeg) / atlagdb;
+		return atlag;
+	}
+	
+	public double getSzoras()
+	{
+		atlag = getAtlag();
+		szorasosszeg = 0.0;
+		melyseg = atlagdb = 0;
+		
+		rszoras(gyoker);
+		
+		if(atlagdb - 1 > 0)
+		{
+			szoras = Math.sqrt(szorasosszeg / (atlagdb - 1));
+		}
+		else
+		{
+			szoras = Math.sqrt(szorasosszeg);
+		}		
+		
+		return szoras;
+	}
+	
+	public void ratlag(Csomopont elem)
+	{
+		if(elem != null)
+		{
+			++melyseg;
+			ratlag(elem.egyesGyermek());
+			ratlag(elem.nullasGyermek());
+			--melyseg;
+			if(elem.egyesGyermek() == null && elem.nullasGyermek() == null)
+			{
+				++atlagdb;
+				atlagosszeg += melyseg;
+			}
+		}
+	}
+	
+	public void rszoras(Csomopont elem)
+	{
+		if(elem != null)
+		{
+			++melyseg;
+			rszoras(elem.egyesGyermek());
+			rszoras(elem.nullasGyermek());
+			--melyseg;
+			if(elem.egyesGyermek() == null && elem.nullasGyermek() == null)
+			{
+				++atlagdb;
+				szorasosszeg += ((melyseg - atlag) * (melyseg - atlag));
+			}
+		}
+	}
+	
+	public static void usage()
+	{
+		System.out.println("Usage: lzwtree in_file -o out_file");
+	}
+	
+
+	public static void main(String[] args)
+	{
+		if(args.length != 3)
+		{
+			usage();
+			System.exit(-1);
+		}
+		
+		String inFile = args[0];
+		
+		if(!"-o".equals(args[1]))
+		{
+			usage();
+			System.exit(-1);
+		}
+		
+		try
+		{
+			java.io.FileInputStream beFile = new java.io.FileInputStream(new java.io.File(args[0]));
+			
+			java.io.PrintWriter kiFile = new java.io.PrintWriter( new java.io.BufferedWriter( new java.io.FileWriter(args[2])));
+
+			
+			
+			byte[] b = new byte[1];
+			
+			Binfa binFa = new Binfa();
+			
+			while(beFile.read(b) != -1)
+			{
+				if(b[0] == 0x0a)
+				{
+					break;
+				}
+			}
+			boolean kommentben = false;
+			
+			while(beFile.read(b) != -1)
+			{
+				if(b[0] == 0x3e)
+				{
+					kommentben = true;
+					continue;
+				}
+				
+				if(b[0] == 0x0a)
+				{
+					kommentben = false;
+					continue;
+				}
+				
+				if(kommentben)
+				{
+					continue;
+				}
+				
+				if(b[0] == 0x4e)
+				{
+					continue;
+				}
+				
+				for (int i = 0; i < 8; ++i)
+				{
+					if((b[0] & 0x80) != 0)
+					{
+						binFa.egyBitFeldolg('1');
+					}
+					else
+					{
+						binFa.egyBitFeldolg('0');
+					}
+					b[0] <<= 1;
+				}
+			}
+			
+			binFa.kiir(kiFile);
+			
+			kiFile.println("depth = " + binFa.getMelyseg());
+			kiFile.println("mean = " + binFa.getAtlag());
+			kiFile.println("var = " + binFa.getSzoras());
+			
+			kiFile.close();
+			beFile.close();
+			
+		} catch (Exception e) {
+			System.err.print(e.getMessage());
+		}
+	}
+}
+
+        ]]>
+        </programlisting>
+	<para>
+	A feladat második része az volt, hogy ezt a Binfa-t emeljük át egy Java Servletbe és irassuk ki a fát egy böngészőbe. Ahhoz, hogy működőképes legyen a Servlet szükség volt egy Tomcat Serverre. Letöltés után integrálni kellett a JRE-hez, amit az Eclipse telepítési könyvtárában találtam. A megfelelő konfiguráció után a <function>8085</function>-ös porton elértem a Tomcat szervert. Következő lépésként indítottam egy Dinamikus Web Projektet, amit belül csináltam egy <function>LZWBinfaServlet.java</function> servlet file-t. Ezen fájl automatikusan legenerálta a szükséges metódusokat, konstruktorokat a megfelelő működéshez. A classom a HttpServlet osztályból lett származtatva, illetve kaptunk egy <function>doGet(...)</function> eljárást. Ez az eljárás felel a HTTP GET kérésékért, ami nekünk pont kapóra jött. 
+</para>
+<para>Az LZWBinfa forráskódból mindent átírtunk a main függvény kivételével. A main kódjait a doGet(...) eljáráson belül írjuk meg. A kész doGet(...) így néz ki:</para>
+<programlisting language="java">
+        <![CDATA[
+        **
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		String parameter = request.getParameter("param");
+		
+		byte[] b = parameter.getBytes();
+		
+		Binfa binFa = new Binfa();
+		
+		java.io.PrintWriter kiFile = new java.io.PrintWriter( new java.io.BufferedWriter( new java.io.FileWriter("output.txt")));
+		
+		boolean kommentben = false;
+		
+		for(int h = 0; h < b.length; ++h)
+		{
+			if(b[h] == 0x3e)
+			{
+				kommentben = true;
+				continue;
+			}
+			
+			if(b[h] == 0x0a)
+			{
+				kommentben = false;
+				continue;
+			}
+			
+			if(kommentben)
+			{
+				continue;
+			}
+			
+			if(b[h] == 0x4e)
+			{
+				continue;
+			}
+			
+			for (int i = 0; i < 8; i++)
+			{
+				if((b[h] & 0x80) != 0)
+				{
+					binFa.egyBitFeldolg('1');
+				}
+				else
+				{
+					binFa.egyBitFeldolg('0');
+				}
+				b[h] <<= 1;
+			}
+		}
+		
+		binFa.kiir(kiFile);
+		
+		kiFile.println("depth = " + binFa.getMelyseg());
+		kiFile.println("mean = " + binFa.getAtlag());
+		kiFile.println("var = " + binFa.getSzoras());
+		
+		kiFile.close();
+		
+		File file = new File("output.txt");
+		FileInputStream fis = new FileInputStream(file);
+		
+		// TODO Auto-generated method stub
+		response.setContentType("text/html");
+		
+		PrintWriter out = response.getWriter();
+		out.println("<!DOCTYPE html>");
+		out.println("<html>");
+		
+		
+		out.println("<head><title>LZWBinfa</title></head>");
+		out.println("<body>");
+		out.println("<h2>Dékány Róbert LZWBinfa Servlet</h2>");
+		try(BufferedReader br = new BufferedReader(new InputStreamReader(fis))) { for(String line; (line = br.readLine()) != null; ) { out.println("<p>" + line + "</p>"); } }
+		
+		out.println("</body></html>");
+	}
+        ]]>
+        </programlisting>
+	<para>A <function>String parameter = request.getParameter("param");</function> változóban lesz eltárolva az URI-ból vett param nevű paraméter értéke. Ezt a karakterláncot fogjuk továbbadni a Binfának. A <function>PrintWriter out = response.getWriter();</function> egy olyan objektummal tér vissza, ami képes kiírni az outputra jelen esetbe HTML kódokat. A továbbiakban csak kiiíratjuk a Stream tartalmát és elhelyezzük a szükséges HTML-t.</para>
+<figure>
+            <title>LZWBinfa megjelenítése böngészőben.</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/servlet.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+    </section>
+<section>
+<title>„Gagyi”</title>
+<para>
+Feladatunk az alábbi feltételre épül:
+</para>
+<programlisting language="java">
+        <![CDATA[
+        while (x <= t && x >= t && t != x);
+        ]]>
+        </programlisting>
+<para>Ha külön az x,t értékének -128-at majd -129-et adunk mit tapasztalunk? A -128 nem teljesük a feltétel nem teljesük és kilép a ciklusból míg a -129-nél végtelen ciklusba kerül.</para>
+
+<programlisting language="java">
+        <![CDATA[
+        public class Gagyi2
+{
+
+public static void main (String[]args)
+{
+
+Integer x = -129;
+Integer t = -129;
+
+System.out.println (x);
+System.out.println (t);
+
+while (x <= t && x >= t && t != x);
+
+}
+
+}
+
+public class Gagyi3
+{
+
+public static void main (String[]args)
+{
+
+Integer x = -128;
+Integer t = -128;
+
+System.out.println (x);
+System.out.println (t);
+
+while (x <= t && x >= t && t != x);
+
+}
+
+}
+        ]]>
+        </programlisting>
+<para>Röviden a -128 esetén a x és t objektumok megegyeznek míg a -129 esetén két különöböző objektum. A bővebb magyarázatot a JDK Integer.java forrására adja meg.</para>
+<figure>
+            <title>JDK Integer.java</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/integer.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+<programlisting language="java">
+        <![CDATA[
+@HotSpotIntrinsicCandidate
+    public static Integer valueOf(int i) {
+        return i >= -128 && i <= Integer.IntegerCache.high ? Integer.IntegerCache.cache[i + 128] : new Integer(i);
+    }
+        ]]>
+        </programlisting>
+	<para>A <function>public static Integer valueOf(int i)</function> függvény egy Integer objektummal tér vissza. Ha a paraméter i értéke kisebb vagy egyenlő, mint a IntegerCache.high értéke akkor egy IntegerCache poolból adja vissza az objektumot. Viszont, ha nagyobb akkor egy új Integer objektumot ad vissza, ami már új memóriacímmmel fog rendelezni.</para>
+</section>
+<section>
+	<title>Yoda</title>
+	<para>Ebben a feladatban egy Java programot kellett írni, amely NullPointerException-el leáll, ha nem követjük a Yoda conditiont. A Yoda Condition lényege, hogy a feltétel sorrendje megfordul. Baloldalon a konstans fogal helyet. </para>
+<programlisting language="java">
+<![CDATA[
+public class Main {
+
+    public static void main(String[] args)
+    {
+        String name = null;
+        if (name.equals("John")) { /* ... */ }
+    }
+}
+        ]]>
+        </programlisting>
+	<para>A felti kód NullPointerException kivételt ad, mert name változó egy nullpointer és hasonlítani akarjuk a "John" karakterlánchoz, ami nem megengedett.</para>
+<figure>
+            <title>NullPointerException, ha nem használjuk a Yoda Conditiont.</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/yoda.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+	<para>Ha megfordítjuk a feltétel sorrendjét és használjuk a Yoda conditiont akkor már jó.</para>
+<programlisting language="java">
+<![CDATA[
+public class Main
+{
+
+    public static void main(String[] args)
+    {
+        String name = null;
+        if (("John".equals(name)) { /* ... */ }
+    }
+}
+        ]]>
+	
+        </programlisting>
+</section>
+<section>
+<title>Kódolás from scratch</title>
+<para>Feladat volt a BBP (Bailey-Borwein-Plouffe) algoritmust a Pi hexa jegyeinek számolását végző osztály megírása egy <link xlink:href="https://www.davidhbailey.com//dhbpapers/bbp-alg.pdf">tudományos közlemény</link> alapján. A közleményt illetve a megadott példákat felhasználva sikerült megírni az algoritmust: </para>
+<programlisting language="java">
+<![CDATA[
+package com.company;
+
+public class PiBBP {
+
+    String d16PiHexaJegyek;
+
+    public PiBBP(int d) {
+
+        double d16Pi = 0.0d;
+
+        double d16S1t = d16Sj(d, 1);
+        double d16S4t = d16Sj(d, 4);
+        double d16S5t = d16Sj(d, 5);
+        double d16S6t = d16Sj(d, 6);
+
+        d16Pi = 4.0d*d16S1t - 2.0d*d16S4t - d16S5t - d16S6t;
+
+        d16Pi = d16Pi - StrictMath.floor(d16Pi);
+
+        StringBuffer sb = new StringBuffer();
+
+        Character hexaJegyek[] = {'A', 'B', 'C', 'D', 'E', 'F'};
+
+        while(d16Pi != 0.0d) {
+
+            int jegy = (int)StrictMath.floor(16.0d*d16Pi);
+
+            if(jegy<10)
+                sb.append(jegy);
+            else
+                sb.append(hexaJegyek[jegy-10]);
+
+            d16Pi = (16.0d*d16Pi) - StrictMath.floor(16.0d*d16Pi);
+        }
+
+        d16PiHexaJegyek = sb.toString();
+    }
+
+    public double d16Sj(int d, int j) {
+
+        double d16Sj = 0.0d;
+
+        for(int k=0; k<=d; ++k)
+            d16Sj += (double)n16modk(d-k, 8*k + j) / (double)(8*k + j);
+
+        return d16Sj - StrictMath.floor(d16Sj);
+    }
+
+    public long n16modk(int n, int k) {
+
+        int t = 1;
+        while(t <= n)
+            t *= 2;
+
+        long r = 1;
+
+        while(true) {
+
+            if(n >= t) {
+                r = (16*r) % k;
+                n = n - t;
+            }
+
+            t = t/2;
+
+            if(t < 1)
+                break;
+
+            r = (r*r) % k;
+
+        }
+
+        return r;
+    }
+
+    public String toString() {
+
+        return d16PiHexaJegyek;
+    }
+
+    public static void main(String args[]) {
+        System.out.print(new PiBBP(1000000));
+    }
+}
+        ]]>
+        </programlisting>
+<figure>
+            <title>BBP algoritmus output.</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/bbp.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+</section>
+
+</chapter>
