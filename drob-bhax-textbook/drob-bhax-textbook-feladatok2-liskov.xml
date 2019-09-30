@@ -1,0 +1,765 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+    <info>
+        <title>Helló, Liskov!</title>
+        <keywordset>
+            <keyword/>
+        </keywordset>
+    </info>
+    <section>
+	<title>Öröklődés, osztályhierarchia. Polimorfizmus,
+metódustúlterhelés. Hatáskörkezelés. A bezárási eszközrendszer,
+láthatósági szintek. Absztrakt osztályok és interfészek.</title>
+	<para>Az öröklődés (inheritance) lehetővé teszi, hogy alosztályok (subclass) használatával hierarchikus kapcsolatot hozzunk létre osztályok között. A gyermekosztály örökli a bázisosztály tulajdonságait. Öröklődéssel építhetünk a tulajdonságaira és új tulajdonságokkal ruházhatjuk  fel. A többalakúság (polymorphism) alatt azt értjük, hogy eltérő osztályok eltérő viselkedéssel rendelkezhetnek ugyanazon műveletre. Gondoljuk egy bicikli osztályra azon belül egy tisztít metódusra. Az emberi nyelvben a tisztít, mint fogalom álltalános megfogalmazás ezért nem csak a biciklire tudjuk alkalmazni. Hatáskörkezelés egyik fogalma az egységbezárás (encapsulation). Ez annyit takar, hogy minden osztálynak megvannak a tulajdonságai és metódusai, amik egybe tartoznak ezért célszerű egy egységbe zárni őket. (pl.: osztályok). Másik ilyen fogalom az adatelrejtés vagy data hiding. Ezen elv alapján korlátozást szabhatjuk az osztály egyes adatelemeinek elérésére. Ez azért nagyon fontos, hogy a kritikus tulajdonságokat (pl.: banki program, egyenleg) ne lehessen módosítani. Ha módosítani szeretnénk azt az getter, setter metódusokon keresztül tegyük meg. (ha van rá lehetőség) A private, protected, public láthatósági módosítók segítenek az adatelrejtésben illetve az elérések szabályozásában. A törzs nélküli metódusokat definiáló osztályokat absztrakt osztályoknak nevezzük. Lényege, hogy az alosztályok interface-nek közös részét adja, konkrét implementációt nem. Ez többnyire az osztályhierachia tetején álló osztályokból tevődik össze. Az absztrakt osztályok nem példányosíthatóak. Az interfacek olyan referencia típusok, amelyekben csak deklarációk szerepelnek. Ez segíti az absztrakciós szint bevezetését.</para>
+    </section>
+<section>
+	<title>Liskov helyettesítés sértése</title>
+	<para>Ebben a feladatban a Liskov-féle helyettesítési elv megsértésére kellett egy C++ illetve Java példát írni. Ezen elv a S.O.L.I.D alapelvek egyike, amely elősegíti a tiszta kód készítését. A Liskov-féle helyettesítés arról szól, hogy minden osztály legyen helyettesíthető a leszármazott osztályával anélkül, hogy a program helyes működését befolyásolná. Ha S leszármazottja T-nek, akkor behelyettesíthetjük minden gond nélkül T helyére S-t. Ezen elvet megsértő C++ kód:</para>
+<programlisting language="c++">
+<![CDATA[
+#include <iostream>
+
+class Bank
+{
+
+private:
+  unsigned int money;
+
+public:
+  virtual void setMoney(int m)
+  {
+    money = m;
+  }
+
+  virtual int getMoney()
+  {
+    return money;
+  }
+
+};
+
+class ThiefBank : public Bank
+{
+
+  int getMoney()
+  {
+    return 0;
+  }
+
+};
+
+int main()
+{
+
+  Bank *bank = new ThiefBank();
+
+  bank->setMoney(555);
+
+  std::cout << bank->getMoney() << std::endl;
+
+  return 0;
+  
+}
+        ]]>
+	
+        </programlisting>
+<para>Mint látható a <function>ThiefBank</function> osztályban a <function>getMoney()</function> metódus megváltozik. Ezáltal nem teljesül az a feltétel, hogy ugyanazon működés kell, hogy legyen. Ha viszont a ThiefBank osztályban a getMoney() függvényt átírjuk getMonkey()-ra, akkor már a helyes működést tapasztalnánk. :D</para>
+<figure>
+            <title>ThiefBank helytelenül működik.</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/liskovcpp.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+<para>Hasonló példakód a Liskolv-elv megsértésére Java-ban: </para>
+<programlisting language="java">
+<![CDATA[
+class LiskovLoveYou
+{
+    private String welcome;
+
+    public void setWelcome(String welcome)
+    {
+        this.welcome = welcome;
+    }
+
+    public String getWelcome()
+    {
+        return this.welcome;
+    }
+
+}
+class LiskovHateYou extends LiskovLoveYou
+{
+    public String getWelcome()
+    {
+        return "I hate you so much!";
+    }
+}
+
+public class Liskov
+{
+    public static void main(String[] args)
+    {
+        LiskovLoveYou l = new LiskovHateYou();
+
+        System.out.println("Liskov: " + l.getWelcome());
+    }
+}
+        ]]>
+	
+        </programlisting>
+<para>Ezen kódcsipetek segítenek rájönni, hogy mennyire sokszínű hibákat követhetünk el kódolás közben. Érdemes a különböző kódolási alapelveket követve kódolni, mert sok fejfájástól megkímélhetjük magunkat és másokat.</para>
+    </section>
+<section>
+	<title>Szülő-gyerek</title>
+	<para>Ebben a feladatban a bázisosztály-gyerekosztály kapcsolatra kellett példát készíteni. Igazolni kell, hogy a származtatás ellenére lesznek olyan metódusok, amelyeket az ősosztály nem láthat vagyis "ősön
+keresztül csak az ős üzenetei küldhetőek". Kód: </para>
+<programlisting language="c++">
+<![CDATA[
+#include <iostream>
+
+class Bank
+{
+
+private:
+  unsigned int money;
+
+public:
+  virtual void setMoney(int m)
+  {
+    money = m;
+  }
+
+  virtual int getMoney()
+  {
+    return money;
+  }
+
+};
+
+class ThiefBank : public Bank
+{
+
+  int getMonkey()
+  {
+    return 0;
+  }
+
+};
+
+int main()
+{
+
+  Bank *bank = new ThiefBank();
+
+  std::cout << bank->getMonkey() << std::endl;
+
+  return 0;
+  
+}
+        ]]>
+	
+        </programlisting>
+<para>A példában <function>ThiefBank</function> gyermekosztályban egy új <function>getMonkey()</function> metódust van definiálva. A <function>Bank *bank = new ThiefBank();</function> értékadásnál a Bank a <function>statikus típus</function> míg a ThiefBank a <function>dinamikus típus</function>. A dinamikus típus futás időben, a statikus típus pedig fordítási időben definiált. A probléma ott keződik, hogy a Monkey() metódus az ősosztályban nem definiált így már fordítás közben megakad. A program az <function>error: ‘class Bank’ has no member named ‘getMonkey’</function>-el elszáll. Az előbbi probléma Java kódja:</para>
+<programlisting language="java">
+<![CDATA[
+class LiskovLoveYou
+{
+    private String welcome;
+
+    public void setWelcome(String welcome)
+    {
+        this.welcome = welcome;
+    }
+
+    public String getWelcome()
+    {
+        return this.welcome;
+    }
+
+}
+class LiskovHateYou extends LiskovLoveYou
+{
+    public String getColdWelcome()
+    {
+        return "I hate you so much!";
+    }
+}
+
+public class Liskov
+{
+    public static void main(String[] args)
+    {
+        LiskovLoveYou l = new LiskovHateYou();
+
+        System.out.println("Liskov: " + l.getColdWelcome());
+    }
+}
+        ]]>
+	
+        </programlisting>
+<para>Az IntelliJ már a kód beírásánál sípol, hibát jelez, ahogy az várható volt.</para>
+
+    </section>
+<section>
+	<title>Anti OO</title>
+	<para>A feladat az előző csokorból megismert PiBBP algoritmusra épít. 0. pozíciótól számított <inlineequation><mathphrase>10<superscript>6</superscript></mathphrase></inlineequation>, <inlineequation><mathphrase>10<superscript>7</superscript></mathphrase></inlineequation>, <inlineequation><mathphrase>10<superscript>8</superscript></mathphrase></inlineequation> darab
+jegyét kellett meghatározni C, C++, Java és C# nyelveken és összevetni a futási időket! Kissé időigényes volt átírni az adott nyelvekre, de végül sikerül a futási időket is lemérni. Itt a Java kód:</para>
+<programlisting language="java">
+<![CDATA[
+public class PiBBP {
+
+    String d16PiHexaJegyek;
+
+    long startTimer = System.currentTimeMillis();
+
+    public PiBBP(int d) {
+
+        double d16Pi = 0.0d;
+
+        double d16S1t = d16Sj(d, 1);
+        double d16S4t = d16Sj(d, 4);
+        double d16S5t = d16Sj(d, 5);
+        double d16S6t = d16Sj(d, 6);
+
+        d16Pi = 4.0d*d16S1t - 2.0d*d16S4t - d16S5t - d16S6t;
+
+        d16Pi = d16Pi - StrictMath.floor(d16Pi);
+
+        StringBuffer sb = new StringBuffer();
+
+        Character hexaJegyek[] = {'A', 'B', 'C', 'D', 'E', 'F'};
+
+        while(d16Pi != 0.0d) {
+
+            int jegy = (int)StrictMath.floor(16.0d*d16Pi);
+
+            if(jegy<10)
+                sb.append(jegy);
+            else
+                sb.append(hexaJegyek[jegy-10]);
+
+            d16Pi = (16.0d*d16Pi) - StrictMath.floor(16.0d*d16Pi);
+        }
+        long endTimer = System.currentTimeMillis();
+
+
+        float time = (endTimer - startTimer) / 1000F;
+
+        System.out.println(time + " ms");
+
+        d16PiHexaJegyek = sb.toString();
+    }
+
+    public double d16Sj(int d, int j) {
+
+        double d16Sj = 0.0d;
+
+        for(int k=0; k<=d; ++k)
+            d16Sj += (double)n16modk(d-k, 8*k + j) / (double)(8*k + j);
+
+        return d16Sj - StrictMath.floor(d16Sj);
+    }
+
+    public long n16modk(int n, int k) {
+
+        int t = 1;
+        while(t <= n)
+            t *= 2;
+
+        long r = 1;
+
+        while(true) {
+
+            if(n >= t) {
+                r = (16*r) % k;
+                n = n - t;
+            }
+
+            t = t/2;
+
+            if(t < 1)
+                break;
+
+            r = (r*r) % k;
+
+        }
+
+        return r;
+    }
+
+    public String toString() {
+
+        return d16PiHexaJegyek;
+    }
+
+    public static void main(String args[]) {
+        System.out.println("10^6: ");
+        System.out.print("hexa:" + new PiBBP(1000000));
+    }
+}
+        ]]>
+	
+        </programlisting>
+<figure>
+            <title>Java-féle futási idők (sec)</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/pijava.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+<para>C kód:</para>
+<programlisting language="c">
+<![CDATA[
+#include <stdio.h>
+#include <math.h>
+#include <time.h>
+/*
+ * pi_bbp_bench.c
+ *
+ * DIGIT 2005, Javat tanítok
+ * Bátfai Norbert, nbatfai@inf.unideb.hu
+ *
+ * A PiBBP.java-ból kivettük az "objektumorientáltságot", így kaptuk
+ * a PiBBPBench osztályt, amit pedig átírtuk C nyelvre.
+ *
+ */
+
+/*
+ * 16^n mod k
+ * [BBP ALGORITMUS] David H. Bailey: The
+ * BBP Algorithm for Pi. alapján.
+ */
+long
+n16modk (int n, int k)
+{
+  long r = 1;
+
+  int t = 1;
+  while (t <= n)
+    t *= 2;
+
+  for (;;)
+    {
+
+      if (n >= t)
+	{
+	  r = (16 * r) % k;
+	  n = n - t;
+	}
+
+      t = t / 2;
+
+      if (t < 1)
+	break;
+
+      r = (r * r) % k;
+
+    }
+
+  return r;
+}
+
+/* {16^d Sj}
+ * [BBP ALGORITMUS] David H. Bailey: The
+ * BBP Algorithm for Pi. alapján.
+ */
+double
+d16Sj (int d, int j)
+{
+
+  double d16Sj = 0.0;
+  int k;
+
+  for (k = 0; k <= d; ++k)
+    d16Sj += (double) n16modk (d - k, 8 * k + j) / (double) (8 * k + j);
+
+  /*
+     for(k=d+1; k<=2*d; ++k)
+     d16Sj += pow(16.0, d-k) / (double)(8*k + j);
+   */
+
+  return d16Sj - floor (d16Sj);
+}
+
+/*
+ * {16^d Pi} = {4*{16^d S1} - 2*{16^d S4} - {16^d S5} - {16^d S6}}
+ * [BBP ALGORITMUS] David H. Bailey: The
+ * BBP Algorithm for Pi. alapján.
+ */
+main ()
+{
+
+  double d16Pi = 0.0;
+
+  double d16S1t = 0.0;
+  double d16S4t = 0.0;
+  double d16S5t = 0.0;
+  double d16S6t = 0.0;
+
+  int jegy;
+  int d;
+
+  clock_t delta = clock ();
+
+  for (d = 100000000; d < 100000001; ++d)
+    {
+
+      d16Pi = 0.0;
+
+      d16S1t = d16Sj (d, 1);
+      d16S4t = d16Sj (d, 4);
+      d16S5t = d16Sj (d, 5);
+      d16S6t = d16Sj (d, 6);
+
+      d16Pi = 4.0 * d16S1t - 2.0 * d16S4t - d16S5t - d16S6t;
+
+      d16Pi = d16Pi - floor (d16Pi);
+
+      jegy = (int) floor (16.0 * d16Pi);
+
+    }
+
+  printf ("%d\n", jegy);
+  delta = clock () - delta;
+  printf ("%f\n", (double) delta / CLOCKS_PER_SEC);
+}
+
+        ]]>
+        </programlisting>
+<figure>
+            <title>C-féle futási idők (sec)</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/pic.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+<para>C# kód:</para>
+<programlisting language="c++">
+<![CDATA[
+public class PiBBPBench {
+
+    public static double d16Sj(int d, int j) {
+
+        double d16Sj = 0.0d;
+
+        for(int k=0; k<=d; ++k)
+            d16Sj += (double)n16modk(d-k, 8*k + j) / (double)(8*k + j);
+
+        /*
+        for(int k=d+1; k<=2*d; ++k)
+            d16Sj += System.Math.pow(16.0d, d-k) / (double)(8*k + j);
+         */
+
+        return d16Sj - System.Math.Floor(d16Sj);
+    }
+
+    public static long n16modk(int n, int k) {
+
+        int t = 1;
+        while(t <= n)
+            t *= 2;
+
+        long r = 1;
+
+        while(true) {
+
+            if(n >= t) {
+                r = (16*r) % k;
+                n = n - t;
+            }
+
+            t = t/2;
+
+            if(t < 1)
+                break;
+
+            r = (r*r) % k;
+
+        }
+
+        return r;
+    }
+
+     public static void Main(System.String[]args) {
+
+        double d16Pi = 0.0d;
+
+        double d16S1t = 0.0d;
+        double d16S4t = 0.0d;
+        double d16S5t = 0.0d;
+        double d16S6t = 0.0d;
+
+        int jegy = 0;
+
+        System.DateTime kezd = System.DateTime.Now;
+
+        for(int d=100000000; d<100000001; ++d) {
+
+            d16Pi = 0.0d;
+
+            d16S1t = d16Sj(d, 1);
+            d16S4t = d16Sj(d, 4);
+            d16S5t = d16Sj(d, 5);
+            d16S6t = d16Sj(d, 6);
+
+            d16Pi = 4.0d*d16S1t - 2.0d*d16S4t - d16S5t - d16S6t;
+
+            d16Pi = d16Pi - System.Math.Floor(d16Pi);
+
+            jegy = (int)System.Math.Floor(16.0d*d16Pi);
+
+        }
+
+        System.Console.WriteLine(jegy);
+        System.TimeSpan delta = System.DateTime.Now.Subtract(kezd);
+        System.Console.WriteLine(delta.TotalMilliseconds/1000.0);
+    }
+}
+        ]]>
+        </programlisting>
+<figure>
+            <title>C#-féle futási idők (sec)</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/pics.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+<para>C++ kód:</para>
+<programlisting language="c++">
+<![CDATA[
+#include <iostream>
+#include <math.h>
+#include <time.h>
+/*
+ * pi_bbp_bench.c
+ *
+ * DIGIT 2005, Javat tanítok
+ * Bátfai Norbert, nbatfai@inf.unideb.hu
+ *
+ * A PiBBP.java-ból kivettük az "objektumorientáltságot", így kaptuk
+ * a PiBBPBench osztályt, amit pedig átírtuk C nyelvre.
+ *
+ */
+
+/*
+ * 16^n mod k
+ * [BBP ALGORITMUS] David H. Bailey: The
+ * BBP Algorithm for Pi. alapján.
+ */
+long n16modk (int n, int k)
+{
+  long r = 1;
+
+  int t = 1;
+  while (t <= n)
+    t *= 2;
+
+    if(t > n)
+      t /= 2;
+
+  while(true)
+  {
+
+      if (n >= t)
+    	{
+    	  r = (16 * r) % k;
+    	  n = n - t;
+    	}
+
+      t = t / 2;
+
+      if (t < 1)
+	       break;
+
+      r = (r * r) % k;
+    }
+
+  return r;
+}
+double d16Sj (int d, int j)
+{
+
+  double d16Sj = 0.0;
+
+  for (int k = 0; k <= d; ++k)
+    d16Sj += (double) (n16modk (d - k, 8 * k + j)) / (double) (8 * k + j);
+
+  return d16Sj - floor (d16Sj);
+}
+
+int main()
+{
+
+  double d16Pi = 0.0;
+
+  double d16S1t = 0.0;
+  double d16S4t = 0.0;
+  double d16S5t = 0.0;
+  double d16S6t = 0.0;
+
+  int jegy;
+
+  clock_t delta = clock ();
+
+  for (int d = 100000000; d < 100000001; ++d)
+    {
+
+      d16Pi = 0.0;
+
+      d16S1t = d16Sj (d, 1);
+      d16S4t = d16Sj (d, 4);
+      d16S5t = d16Sj (d, 5);
+      d16S6t = d16Sj (d, 6);
+
+      d16Pi = 4.0 * d16S1t - 2.0 * d16S4t - d16S5t - d16S6t;
+
+      d16Pi = d16Pi - floor (d16Pi);
+
+      jegy = (int) floor (16.0 * d16Pi);
+
+    }
+  std::cout << jegy << '\n';
+  delta = clock () - delta;
+  std::cout << static_cast<double>(delta)/CLOCKS_PER_SEC << '\n';
+}
+
+        ]]>
+        </programlisting>
+<figure>
+            <title>C++-féle futási idők (sec)</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/picpp.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+<figure>
+            <title>Összefoglaló táblázat a futási időkről</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/tabla.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+    </section>
+<section>
+	<title>Hello, Android!</title>
+	<para>Az Android Studio telepítése után a Settings-be be kellett állítani az Android SDK-t. Ez pár kattintás és opció elfogadásával hamar települt. Következő lépés az Android Emulator configurálása volt. Ehhez le kellett tölteni egy emulátor virtualizációs csomagot: <function>sudo apt install qemu-kvm</function> majd hozzáadni a userünket a /etc/group a kvm/ csoporthoz. Ezután az Android Studion belül beállítottunk egy emulátor eszközt a Virtual Device Manager segítségével:</para>
+<figure>
+            <title>Emulátor hardver tulajdonságai</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/android2.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+<figure>
+            <title>Emulátor egyéb tulajdonságai</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/android4.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+<figure>
+            <title>Android Emulátor eszközök listája</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/android1.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+<para>Ha az összes lépésen végigmentünk akkor kész vagyunk futtatni Emulátoron keresztül a programunkat. Következő lépésként létrehoztunk egy új projektet, amjd átszabtuk az SMNIST formára a következőképpen. Elsőnek a res/layout/ mappába kellet bemásolni az <function>activity_smniste3.xml</function> file-t. Ez fogja beállítani a megfelelő elrendezést az alkalmazásunknak. </para>
+<programlisting language="xml">
+<![CDATA[
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <hu.blog.bhaxor.smnistforhumansexp3.SMNISTSurfaceView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</RelativeLayout>
+        ]]>
+        </programlisting>
+<para>Ezután a app/manifests/ könyvtárba is be kellett másolni az <function>AndroidManifest.xml</function> file-t. Ebben a file-ban az activity android:name attribútuma változott meg. Ezzel mondjuk meg, hogy melyik activity fusson le elsőként.</para>
+<programlisting language="xml">
+<![CDATA[
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.smnist">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity android:name=".SMNISTE3Activity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+        ]]>
+        </programlisting>
+<para> A továbbiakban már csak be kellett másolni az app/java/com.example.smnist/ mappába a négy java forrásfile-t. Itt még keletkezett hiba. Az SMNISTE3Activity osztály származtatva volt egy már elavult AppCompatActivity-ből így lecseréltem egy andoridx-es változatra.</para>
+<programlisting language="java">
+<![CDATA[
+import androidx.appcompat.app.AppCompatActivity;
+
+
+public class SMNISTE3Activity extends AppCompatActivity{
+        ]]>
+        </programlisting>
+<para>Ezek után már lehetett futtatni egy Android Emulátorban. Sajnos az én esetemben lefut viszont maga az alkalmazás kicrash-el. Ezt a jövőben javítani szeretném és teljesen bemutatni a helyes működéssel, illetve a módosításokkal.</para>
+<figure>
+            <title>SMNIST error</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/smnisterror.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+</section>
+<section>
+	<title>Ciklomatikus komplexitás</title>
+	<para>Ezen csokor utolsó feladataként egy általam választott program ciklomatikus komplexitását kellett kiszámolnom. A ciklomatikus komplexitás egy számérték, amelyet a program komplexitása (bonyolultsága) határoz meg. A komplexitás számítása gráfelméleten alapul.</para>
+<para>A matek képlete a következő:<inlineequation>
+  <mathphrase> M = E − N + 2P</mathphrase>
+</inlineequation></para>
+<para>A komplexitás lemérésére egy <function>Lizard</function> nevű open-source code complexity analyzer-t használok. Github: <link xlink:href="https://github.com/terryyin/lizard">https://github.com/terryyin/lizard</link>. Továbbiakban a PiBBP.java és a Binfa.java komplexitását mértem le. Az előbbi NLOC értéke 57, az utóbbi értéke pedig 250. Ebből is látszik, hogy a Binfában sokkal komplexebb vezérlési szerkezetek vannak implementálva. A kiadott értékeket böngészve sok érdekes adatot szolgáltat a Lizard analyzer:</para>
+<figure>
+            <title>PiBBP.java ciklomatikus komplexitása</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/cikcomp1.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+<figure>
+            <title>Binfa.java ciklomatikus komplexitása</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/cikcomp2.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+ </section>
+
+</chapter>
