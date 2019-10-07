@@ -37,4 +37,20 @@
             </para>
         </xi:fallback>
     </xi:include>
+
+<xi:include href="drob-bhax-textbook-feladatok2-mandelbrot.xml">
+        <xi:fallback>
+            <para>
+                <emphasis>XInclude: bhax-textbook-motto.xml file not found</emphasis>
+            </para>
+        </xi:fallback>
+    </xi:include>
+
+<xi:include href="drob-bhax-textbook-feladatok2-chomsky.xml">
+        <xi:fallback>
+            <para>
+                <emphasis>XInclude: bhax-textbook-motto.xml file not found</emphasis>
+            </para>
+        </xi:fallback>
+    </xi:include>
 </part>

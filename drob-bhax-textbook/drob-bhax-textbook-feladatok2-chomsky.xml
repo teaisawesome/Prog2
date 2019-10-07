@@ -1,0 +1,52 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+    <info>
+        <title>Helló, Chomsky!</title>
+        <keywordset>
+            <keyword/>
+        </keywordset>
+    </info>
+    <section>
+	<title>Objektumorientált programozási nyelvek programnyelvi
+	elemei: karakterkészlet, lexikális egységek, kifejezések, utasítások.</title>
+	<para>...</para>
+</section>
+    <section>
+	<title>Encoding</title>
+	<para>Ebben a részben elméleti részel párhuzamosan az java encoding-ról lesz szó. A feladatban a java nyelven megírt Mandelbrot-halmaz nagyító forráskódját kellett teleírni magyar ékezetes betűkkel. Az IntelliJ-ben ezt tapasztaltam:</para>
+<figure>
+            <title>Mandelbrot nagyító IntelliJ-ben.</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/mandelbrot-zoom-ok.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+<para>Tökéletesen lefutott, semmi hiba nem keletkezett. Ez azért történt, mert az IDE-ben default encoding alapértelmezetten UTF-8 kódolású, ami tartalmaz magy karakterkészletet. A Settings/File Encodings-ban jól látszik:</para>
+<figure>
+            <title>File Encoding</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/inteli-encoding.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+<para>Gondolom, ha ilyen egyszerű lenne nem kaptunk volna ilyen feladatot így a parancssori javac fordítóval is lefordítottam. Az eredmény eltér az előbbitől:</para>
+</section>
+    <section>
+	<title>OOCWC lexer</title>
+	<para>...</para>
+</section>
+    <section>
+	<title>Paszigráfia Rapszódia OpenGL full screen vizualizáció</title>
+	<para>...</para>
+</section>
+    <section>
+	<title>Paszigráfia Rapszódia OpenGL full screen vizualizáció</title>
+	<para>...</para>
+</section>
+    <section>
+	<title>Perceptron osztály</title>
+	<para>...</para>
+</section>
+
+</chapter>

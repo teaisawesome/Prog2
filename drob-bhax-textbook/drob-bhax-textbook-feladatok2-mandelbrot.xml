@@ -1,0 +1,380 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+    <info>
+        <title>Helló, Mandelbrot!</title>
+        <keywordset>
+            <keyword/>
+        </keywordset>
+    </info>
+    <section>
+<title>Modellező eszközök és nyelvek. AZ UML és az UML
+osztálydiagramja.</title>
+	<para>Az UML egy általános célú modellező nyelv.</para>
+    </section>
+    <section>
+<title>Reverse engineering UML osztálydiagram</title>
+	<para>Ebben a feladatban a tavalyi prog1 LZWBinfa C++ forráskódjából kellett UML osztálydiagramot készíteni. Majd beszélni kellett egy kicsit az aggregáció és kompozíció fogalmakról majd ezek kapcsolatáról a kód illetve a diagram között. Ezt a feladatot érdekesnek és hasznosnak találtam, mert pár kattintással hasznos UML diagramot hozhattam létre. Ez egyfajta leellenőrzésként is szolgálhat az egyes UML-es feladatoknál illetve a munka világában is. Ezen feladat elkészítéséhez a Tanár Úr által ajánlott Umbrello UML modellező szoftvert választottam. Telepítés után a <function>Kódimportáló varázsló...</function> segítségével importáltam a binfa forráskódját majd behúztam az osztálydiagram megjelenítőbe. A kiadott UML ábra:
+</para>
+<figure>
+            <title>Binfa UML osztálydiagram</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/binfa-uml.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+<para>
+	Az aggregáció  egy rész-egész kapcsolat, ahol az egyik egész-objektum tartalmazza, vagy birtokolja a rész-másikat. A rész-objektum létezése az egész-objektumtól függ. Beszélhetünk gyenge- illetve erős aggregációrol. Az előbbi jele egy üres rombusz míg az utóbbié egy teli rombusz. Ezeket az osztálydiagramom is szépen szemlélteti. Az erős aggregációt szokás nevezni még kompozíciónak. Kompozíciórol beszélünk a Csomópont esetén hiszen önmagában nincs értelme "létezni". 
+</para>
+    </section>
+<section>
+<title>Forward engineering UML osztálydiagram</title>
+<para>Ebben a feladatban egy már kész UML osztálydiagramból kellett generáltatni forráskódot. Ehhez a feladathoz a Binfa java verzióját használtam. Ehhez legeneráltattam az Kódimport varázslóval az UML ábrát, majd az Umbrelloban kiexportáltam az UML ábra szerint. A következő fain .java forráskódot kaptam:</para>
+<programlisting language="java">
+<![CDATA[
+import java.io.PrintWriter;
+import Binfa.Csomopont;
+
+
+/**
+ * Class Binfa
+ */
+public class Binfa {
+
+  //
+  // Fields
+  //
+
+  protected Csomopont gyoker;
+  private Csomopont fa;
+  private int melyseg;
+  private int atlagosszeg;
+  private int atlagdb;
+  private double szorasosszeg;
+  
+  //
+  // Constructors
+  //
+  public Binfa () { };
+  
+  //
+  // Methods
+  //
+
+
+  //
+  // Accessor methods
+  //
+
+  /**
+   * Set the value of gyoker
+   * @param newVar the new value of gyoker
+   */
+  protected void setGyoker (Csomopont newVar) {
+    gyoker = newVar;
+  }
+
+  /**
+   * Get the value of gyoker
+   * @return the value of gyoker
+   */
+  protected Csomopont getGyoker () {
+    return gyoker;
+  }
+
+  /**
+   * Set the value of fa
+   * @param newVar the new value of fa
+   */
+  private void setFa (Csomopont newVar) {
+    fa = newVar;
+  }
+
+  /**
+   * Get the value of fa
+   * @return the value of fa
+   */
+  private Csomopont getFa () {
+    return fa;
+  }
+
+  /**
+   * Set the value of melyseg
+   * @param newVar the new value of melyseg
+   */
+  private void setMelyseg (int newVar) {
+    melyseg = newVar;
+  }
+
+  /**
+   * Get the value of melyseg
+   * @return the value of melyseg
+   */
+  private int getMelyseg () {
+    return melyseg;
+  }
+
+  /**
+   * Set the value of atlagosszeg
+   * @param newVar the new value of atlagosszeg
+   */
+  private void setAtlagosszeg (int newVar) {
+    atlagosszeg = newVar;
+  }
+
+  /**
+   * Get the value of atlagosszeg
+   * @return the value of atlagosszeg
+   */
+  private int getAtlagosszeg () {
+    return atlagosszeg;
+  }
+
+  /**
+   * Set the value of atlagdb
+   * @param newVar the new value of atlagdb
+   */
+  private void setAtlagdb (int newVar) {
+    atlagdb = newVar;
+  }
+
+  /**
+   * Get the value of atlagdb
+   * @return the value of atlagdb
+   */
+  private int getAtlagdb () {
+    return atlagdb;
+  }
+
+  /**
+   * Set the value of szorasosszeg
+   * @param newVar the new value of szorasosszeg
+   */
+  private void setSzorasosszeg (double newVar) {
+    szorasosszeg = newVar;
+  }
+
+  /**
+   * Get the value of szorasosszeg
+   * @return the value of szorasosszeg
+   */
+  private double getSzorasosszeg () {
+    return szorasosszeg;
+  }
+
+  //
+  // Other methods
+  //
+
+  /**
+   */
+  public void Binfa()
+  {
+  }
+
+
+  /**
+   * @param        b
+   */
+  public void egyBitFeldolg(char b)
+  {
+  }
+
+
+  /**
+   */
+  public void kiir()
+  {
+  }
+
+
+  /**
+   * @param        os
+   */
+  public void kiir(java.io.PrintWriter os)
+  {
+  }
+
+
+  /**
+   * @param        elem
+   * @param        os
+   */
+  public void kiir(Binfa.Csomopont elem, java.io.PrintWriter os)
+  {
+  }
+
+
+  /**
+   * @return       int
+   */
+  public int getMelyseg()
+  {
+  }
+
+
+  /**
+   * @param        elem
+   */
+  public void rmelyseg(Binfa.Csomopont elem)
+  {
+  }
+
+
+  /**
+   * @return       double
+   */
+  public double getAtlag()
+  {
+  }
+
+
+  /**
+   * @return       double
+   */
+  public double getSzoras()
+  {
+  }
+
+
+  /**
+   * @param        elem
+   */
+  public void ratlag(Binfa.Csomopont elem)
+  {
+  }
+
+
+  /**
+   * @param        elem
+   */
+  public void rszoras(Binfa.Csomopont elem)
+  {
+  }
+
+
+  /**
+   */
+  public static void usage()
+  {
+  }
+
+
+  /**
+   * @param        args
+   */
+  public static void main(String[] args)
+  {
+  }
+
+
+}
+        ]]>
+        </programlisting>
+<para>A visszakapott kódból látszik, hogy csak függvénydeklarációkat generált ami hűen tükrözi a Binfa osztály szerkezeti felépítését. Ezekhez függvénydefiníciókat nem kapunk hiszen azt majd nekünk kéne megírni. Tervezési fázisban nagyon hasznosak tudnak lenni az UML diagramok erre is próbált rávilágítani ezen két feladat.</para>
+</section>
+<section>
+<title>Egy esettan</title>
+<para>Ezt a feladatot a <function>Szoftverfejlesztés C++ nyelven</function> című könyv 14. fejezetét (427-444 elmélet, 445-469 az esettan) kellett feldolgozni.</para>
+<para>A feladat áttekintése: Egy kereskedés számítógép-alkatrészek és számítógép-konfigurációk értékesítésével foglalkozik. Elsődleges feladtunk egy olyan alkalmazás elkszítése, amely lehetőséget biztosít a kereskedés alkatrészeinek és konfigurációinak nyilvántartására. Ennek keretében támogatnia kell a termékek állományból való betöltését, képernyőre történő listázását, állományba való kiírását és az árképzés rugalmas kialakítását.</para>
+<para>Ezt a feladatot olvasva olyan érzésem volt, mintha hasonló UML-ból írnám meg a forráskódot csak ez szöveges formátumú. Jól követhető, hasznos ábrák alapján viszonylag könnyen megírható a program. Az egyes osztályok működését nem részletezném, mert a könyv jól leírja helyette készítettem az Umbrello UML szoftver segítségével UML osztálydiagramot. A diagram: </para>
+<figure>
+            <title>Termékek létrehozásáért felelős osztályok kapcsolata.</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/esettan-uml.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+<figure>
+            <title>Az programunk output-ja.</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/esettan.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+<figure>
+            <title>computerproducts_out.txt file-ba való exportálás.</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/product.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+</section>
+<section>
+<title>BPMN</title>
+<para>Ebben a feladatban egy tetszőleges üzelti folyamatot kellett modellezni BPMN-ben. A BPMN (Business Process Model and Notations) egy olyan leírás amely különböző ületi folyamatokat modellez. A modellek reprezentálásához hasonló speciális grafikai elemeket használ, mint az UML. Ezek az Eventek (kör, tele-kör), Activity-k (négyzet), Gateway (trapéz), Associations (nyíl, szaggatott-nyíl). A neten sokféle BPMN szoftver megtalálható. Az én példámat a <link xlink:href="https://demo.bpmn.io/">https://demo.bpmn.io/</link> oldalon készítettem el. Az ábra:</para>
+<figure>
+            <title>BPMN modell.</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/bpmn.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+<para>Ezen az ábrán a két folyamatot külön blokk tartalmazza. Ezek a <function>Pokemon Trainer</function> és a <function>Eladó hölgy</function>. Mindkét folyamat egy start eseményre indul. Folytatásképp a Pokemon Trainer belép a Pokemon Center-be és ezzel párhuzamban az Eladó Hölgy köszön neki. Itt asszociáció jön létre, amelyet az modell jól mutat. Folytatódik a folyamat és a Trainer kiválaszt egy Pokélabdát, majd megkérdezi az árát. Itt két ágon mehet tovább a folyamat. Ha $50-ba kerül, akkor megveszi a labdát, de ha nem annyi akkor elhagyja a Pokémon Centert (kilép a programból). Az árat az Eladó Hölgy határozza meg. Majd ha a feltétel igaz ágba fordul, akkor kiszolgálja a Pokémon Trainert (itt szintén asszociáció jön létre) majd kilép a folyamatból. Egyszerű de nagyszerű példa a BPMN lényegére. :D</para>
+</section>
+<section>
+	<title>TeX UML</title>
+	<para>Ebben a feladatban az OOCWC (rObOCar World Championship) projektről kellett diagramot készíteni LaTeX-ben. Ehhez a <link xlink:href="www.overleaf.com">www.overleaf.com</link> online latex editort használtam. Sok bolyongás és fejfájás mellett találtam egy ábrát, amely bemutatja, hogy milyen részekből tevődik össze a <function>real-time traffic analyzer</function>. Ezt az ábrát készítettem el TikZ package (LaTeX) segítségével. A forrás:</para>
+<programlisting language="java">
+<![CDATA[
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{tikz}
+
+\title{OOCWC - Real-Time Traffic Analyzer}
+\author{Dékány Róbert Zsolt}
+
+\tikzstyle{video} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=blue!20]
+
+\tikzstyle{camera} = [rectangle, rounded corners, minimum width=3cm, minimum height=2cm, text centered, draw=black, fill=green!40]
+
+\tikzstyle{axi} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=pink!80]
+
+\tikzstyle{gps} = [rectangle, rounded corners, minimum width=2.5cm, minimum height=2cm, text centered, draw=black, fill=blue!65]
+
+\tikzstyle{zynq} = [rectangle, minimum width=4cm, minimum height=3cm, text centered, draw=black, fill=green!15]
+
+\tikzstyle{reset} = [rectangle, minimum width=2cm, minimum height=1cm, text centered, draw=black, fill=yellow!70]
+
+\tikzstyle{axi2} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=pink!80]
+
+\tikzstyle{gsm} = [rectangle, rounded corners, minimum width=3cm, minimum height=2cm, text centered, draw=black, fill=yellow!40]
+
+\tikzstyle{arrow} = [thick,->,>=stealth]
+
+
+
+
+\begin{document}
+\maketitle
+\begin{tikzpicture}[node distance=2cm]
+\node (video) [video] {Video Direct Memory Access};
+\node (camera) [camera, right of=video, xshift=3cm] {Camera Module};
+\node (axi) [axi, below of=video, yshift=1cm] {AXI Interconnect 0};
+\node (gps) [gps, left of=axi, xshift=-2.3cm] {GPS Module};
+\node (zynq) [zynq, below of=axi, yshift=0.0010cm] {ZYNQ Processing System};
+\node (reset) [reset, right of=zynq, xshift=2.05cm] {Processor System Reset};
+\node (axi2) [axi2, below of=zynq, yshift=0cm] {AXI Interconnect 1};
+\node (gsm) [gsm, below of=axi2, yshift=-0.5cm] {GSM Module};
+\draw [arrow] (camera) -- (video);
+\draw [arrow] (gps) -- (axi);
+\draw [arrow] (axi2) -- (gsm);
+\end{tikzpicture}
+\end{document}
+
+        ]]>
+        </programlisting>
+<figure>
+            <title>Real-Time Traffic Analyzer Figure made by LaTeX.</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/latex-oocwc.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+</section>
+</chapter>
