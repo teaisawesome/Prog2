@@ -1,0 +1,36 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+    <info>
+        <title>Helló, Liskov!</title>
+        <keywordset>
+            <keyword/>
+        </keywordset>
+    </info>
+    <section>
+	<title>Objektumorientált programozási nyelvek típusrendszere (pl.:
+Java, C#) és 6. hét Típusok tagjai: mezők, (nevesített) konstansok,
+tulajdonságok, metódusok, események, operátorok, indexelők,
+konstruktorok, destruktorok, beágyazott típusok.</title>
+<para>...</para>
+ </section>
+<section>
+<title>JDK osztályok</title>
+<para>...</para>
+</section>
+<section>
+<title>Másoló-mozgató szemantika</title>
+<para>...</para>
+</section>
+<section>
+<title>Hibásan implementált RSA törése</title>
+<para>...</para>
+</section>
+<section>
+<title>JDK osztályok</title>
+<para>...</para>
+</section>
+<section>
+<title>JDK osztályok</title>
+<para>...</para>
+</section>
+
+</chapter>

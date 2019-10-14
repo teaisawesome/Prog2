@@ -6,11 +6,6 @@
         </keywordset>
     </info>
     <section>
-	<title>Objektumorientált programozási nyelvek programnyelvi
-	elemei: karakterkészlet, lexikális egységek, kifejezések, utasítások.</title>
-	<para>...</para>
-</section>
-    <section>
 	<title>Encoding</title>
 	<para>Ebben a részben elméleti részel párhuzamosan az java encoding-ról lesz szó. A feladatban a java nyelven megírt Mandelbrot-halmaz nagyító forráskódját kellett teleírni magyar ékezetes betűkkel. Az IntelliJ-ben ezt tapasztaltam:</para>
 <figure>
@@ -31,22 +26,312 @@
             </mediaobject>
         </figure>
 <para>Gondolom, ha ilyen egyszerű lenne nem kaptunk volna ilyen feladatot így a parancssori javac fordítóval is lefordítottam. Az eredmény eltér az előbbitől:</para>
+<figure>
+            <title>javac error a Mandelbrotra</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/man-error.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+<para>A helyes megoldás, ha az alábbi parancsot adjuk ki: <function>javac -encoding "ISO-8859-2" MandelbrotHalmazNagyító.java MandelbrotIterációk.java</function>. Ezzel elértük, hogy az ékezetes betűket felismerje és futtassuk a kódokat. Az eredmény: </para>
+<figure>
+            <title>Ismét lefutott.</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/mandel-ok.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
 </section>
     <section>
-	<title>OOCWC lexer</title>
-	<para>...</para>
+	<title>Maurer Rose - full screen</title>
+	<para>Ebben a feladatban Java nyelven kellett írni egy full screen alkalmazást. A megadott példa több szempontból se volt működőképes így saját példaalkalmazást készítettem a feladatra. Valamelyik este pont néztem a CodingTrain Youtube Csatornát, ahol megláttam és megtetszett a Maurer Rózsa vizualizációja. Így ezt választottam. Lényegében ha jól értelmeztem, akkor a rózsa egy olyan sinuszoid, ami egy polár koordináta rendszerben van ábrázolva. (ezt még pontosítom).
+Lényegében a megadott matematikai algoritmussal két bemenetet várok egy N és D számokat, amelyek megadják a rózsa tulajdonságait. A forráskódja: 
+</para>
+<programlisting language="java">
+<![CDATA[
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.Stroke;
+import java.awt.geom.Path2D;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import java.awt.Toolkit;
+
+@SuppressWarnings("serial")
+public class RosePanel extends JPanel{
+   private static Toolkit tk = Toolkit.getDefaultToolkit();
+   private static int PREF_W = (int) tk.getScreenSize().getWidth();
+   private static int PREF_H = (int) tk.getScreenSize().getHeight();
+   private static final int MAX = 100;
+   private static final double SCALE = 150.0;
+   private static final double DELTA_X = PREF_W / 2;
+   private static final double DELTA_Y = PREF_H / 2;
+   private static Color ROSE_COLOR = Color.blue;
+   private static final Stroke ROSE_STROKE = new BasicStroke(1f);
+   private Path2D path = new Path2D.Double();
+
+   public RosePanel() {
+
+      float N = 6;
+      float D = 71;
+
+      for (float i = 0; i < 2 * Math.PI; i+= ((2 * Math.PI) / 360))
+      {
+
+	float k = i * D;
+	float r = 250 * (float)Math.sin(N * k);
+	float x = r * (float)Math.cos(k) + (float)DELTA_X;
+	float y = r * (float)Math.sin(k) + (float)DELTA_Y;
+
+         if (i == 0) {
+            path.moveTo(x, y);
+         } else {
+            path.lineTo(x, y);
+         }
+      }
+      path.closePath();
+      
+   }
+
+   @Override
+   protected void paintComponent(Graphics g) {
+      super.paintComponent(g);
+      Graphics2D g2 = (Graphics2D) g;
+      g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+            RenderingHints.VALUE_ANTIALIAS_ON);
+      g2.setColor(ROSE_COLOR);
+      g2.setStroke(ROSE_STROKE);
+      g2.draw(path);
+   }
+
+   @Override
+   public Dimension getPreferredSize() {
+      if (isPreferredSizeSet()) {
+         return super.getPreferredSize();
+      }
+      return new Dimension(PREF_W, PREF_H);
+   }
+
+   private static void createAndShowGui() {
+
+      JFrame frame = new JFrame("Maurer Rózsa App");
+      frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+      RosePanel mainPanel = new RosePanel();
+      frame.getContentPane().add(mainPanel);
+      frame.setUndecorated(true);
+      frame.setAlwaysOnTop(true);
+      frame.pack();
+      //frame.setLocationByPlatform(true);
+
+      frame.setVisible(true);
+   }
+
+   public static void main(String[] args) {
+      SwingUtilities.invokeLater(new Runnable() {
+         public void run() {
+		createAndShowGui();
+            
+         }
+      });
+   }
+}
+        ]]>
+        </programlisting>
+	<para>
+		A kódban egy már meglévő ablakos alkalmazás szolgáltatta a vázat. A <function>RosePanel()</function> konstruktor fogja kiszámolni a N és D értékekkel a rózsát majd egy path-ba rakom bele (Path2D). Ezután a <function>paintComponent(Graphics g)</function> metódus végzi el a Rózsa 2D-s megvalósítását. Ehhez egy Grapic2D objektumot hozok létre, módosításokat hajtok végre rajta. Majd a konstruktor az ábrát visszaadja. A Dimension illetve a createAndShowGui() végzi el a teljes képernyő létrehozását. Ehhez a már jól ismert JFrame osztály egy objektumát hívjuk segítségül. Ezt a kis program eddig csak megjelenít. A jövőben tervezek létrehozni egy kis animációt, amely az N és D értékek változásával az ábra is változik. A full screen app:
+	</para>
+<figure>
+            <title>Maurer Rose Figure.</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/rose.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
 </section>
     <section>
 	<title>Paszigráfia Rapszódia OpenGL full screen vizualizáció</title>
-	<para>...</para>
+	<para>A Paszigráfia Rapszódia Dr. Bátfai Norbert kutatatási projektjének egyike. Lényege, hogy lehetővé teszi egy valódi ember és egy mesterséges lény között a kommunikáció létrejöjjön. Ebben a projektben a PaRa vizualizációs lehetőségeit vettük elő. A feladat az volt, hogy egy ilyen vizualizációt valósítjunk meg OpenGL segítségével majd az eredeti programot módosítsuk. Én az alábbi módosításokat végeztem el a kódban:</para>
+<programlisting language="c++">
+<![CDATA[
+void drawPaRaCube ( int idx )
+{
+
+        glPushMatrix();
+
+        int d = cubeLetters.size() / 2 ;
+        glTranslatef ( ( idx-d ) *2.5f, 0.0f, 0.0f );
+
+        glRotatef ( cubeLetters[idx].rotx, 1.0f, 0.0f, 0.0f );
+        glRotatef ( cubeLetters[idx].roty, 0.0f, 1.0f, 0.0f );
+        glRotatef ( cubeLetters[idx].rotz, 0.0f, 0.0f, 1.0f );
+
+        glBegin ( GL_QUADS );
+
+        glColor3f(0.0f, 0.0f, 0.0f); //ezzel elérem, hogy RGB szerint fekete legyen az alapja a kockának
+
+        ]]>
+        </programlisting>
+<programlisting language="c++">
+<![CDATA[
+for ( int i {0}; i<cubeLetters[idx].cc[0].size() /2; ++i )
+{
+                glBegin ( GL_QUADS );
+
+               glColor3f(0.5f, 0.0f, 1.0f);
+
+                glVertex3f ( 1.0f- ( cubeLetters[idx].cc[0][2*i]+1 ) * ( 2.0/cubeLetters[idx].nn[0] ),
+                             1.0f- ( cubeLetters[idx].cc[0][2*i+1]+1 ) * ( 2.0/cubeLetters[idx].nn[0] ), 1.002f );
+                
+                glColor3f(1.0f, 0.99f, 0.0f);
+                
+                glVertex3f ( 1.0f-cubeLetters[idx].cc[0][2*i]* ( 2.0/cubeLetters[idx].nn[0] ),
+                             1.0f- ( cubeLetters[idx].cc[0][2*i+1]+1 ) * ( 2.0/cubeLetters[idx].nn[0] ), 1.002f );
+                
+                glColor3f(0.0f, 0.99f, 0.0f);
+                
+                glVertex3f ( 1.0f-cubeLetters[idx].cc[0][2*i]* ( 2.0/cubeLetters[idx].nn[0] ),
+                             1.0f-cubeLetters[idx].cc[0][2*i+1]* ( 2.0/cubeLetters[idx].nn[0] ), 1.002f );
+                
+                glColor3f(1.0f, 1.1f, 0.0f);
+
+                glColor3f(1.0f, 0.0f, 0.0f);
+                
+                glVertex3f ( 1.0f- ( cubeLetters[idx].cc[0][2*i]+1 ) * ( 2.0/cubeLetters[idx].nn[0] ),
+                             1.0f-cubeLetters[idx].cc[0][2*i+1]* ( 2.0/cubeLetters[idx].nn[0] ), 1.002f );
+
+                glEnd();
+        }
+        ]]>
+        </programlisting>
+<para>A kockánk 0 indexű oldalához hozzárendelt glColor3f-et irtam át illetve egészítettem ki. Az így kapott kockára egy szép átmenetet kaptam végeredményül. A sínskála meghatározásához egy online segédletet használtam. Íme a végeredmény:</para>
+<figure>
+            <title>Módosított OpenGL vizualizáció.</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/kockak.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+<para>Hasonlóan epic lett, mint az Igazság Ligájában a 3 kocka...For the Justice :D</para>
+
 </section>
     <section>
-	<title>Paszigráfia Rapszódia OpenGL full screen vizualizáció</title>
-	<para>...</para>
+	<title>Paszigráfia Rapszódia LuaLaTeX vizualizáció</title>
+	<para>Ez a feladat nem sikerült, mert hát a LuaLaTeX-nek nem kell múködnie, ofc! A közeljövőben jobban ráállok és hátha sikerül.</para>
 </section>
     <section>
 	<title>Perceptron osztály</title>
-	<para>...</para>
+	<para>Ebben a feladatban a jól ismert prog1-es Perceptron osztályos feladatot kellett feléleszteni. Tavaly skippeltem ezt a feladatot így számomra ismeretlen volt, hogy mégis mit takar ez az egész. A prog2 labor órán Feri jól elmagyarázta, hogy mit kellene itt csinálni. Lényege, hogy a forrás kép RGB kódjait (mátrixát) bemásoljuk a neurális háló input rétegébe majd az utolsó réteg visszaad egy számot. A feladat az volt, hogy ne egy számot kapjunk vissza, hanem a forrás kép mátrixát átírva generáljunk egy más színvilágú képet. Először a ml.hpp-t kellett átírni az <function>operator ()</function> túlterhelést, hogy ne egy double-t adjon vissza, hanem egy image tömböt. Ebben már a változott értétek szerepelnek majd. Kódban:</para>
+<programlisting language="c++">
+<![CDATA[
+double* operator() ( double image [] )
+    {
+        
+        units[0] = image;
+        
+        for ( int i {1}; i < n_layers; ++i )
+        {
+            
+            #ifdef CUDA_PRCPS
+            
+            cuda_layer ( i, n_units, units, weights );
+            
+            #else
+            
+            #pragma omp parallel for
+            for ( int j = 0; j < n_units[i]; ++j )
+            {
+                units[i][j] = 0.0;
+                
+                for ( int k = 0; k < n_units[i-1]; ++k )
+                {
+                    units[i][j] += weights[i-1][j][k] * units[i-1][k];
+                }
+                
+                units[i][j] = sigmoid ( units[i][j] );
+                
+            }
+            
+            #endif
+            
+        }
+        
+        // return sigmoid ( units[n_layers - 1][0] );
+        
+        for(int i = 0; i < n_units[n_layers - 1]; i++)
+            image[i] = units[n_layers - 1][i];
+
+        return image;
+    }
+        ]]>
+        </programlisting>
+	<para>Ezután átírtuk a main.cpp-t. A túlterhelt () operátor segítségével előállítunk egy double tömböt ami tartalmazni fogja a módosított kép értékeit. Ezután a készítendő új kép minden egyes RGB objektumának blue értékéhez ezeket rendeljük hozzá. Ezzel elértük,hogy a képen megváltozott a háttér színe. Továbbiakban az új kép RGB objektumaihoz nyúltam és minden egyes fekete tartományba eső R G B objektumnak egy random számot adtam. Ezzel egy szép színes mandelbrot halmazt kaptam eredményül. Itt a main:</para>
+<programlisting language="c++">
+<![CDATA[
+#include <iostream>
+#include "ml.hpp"
+#include <png++/png.hpp>
+#include <fstream>
+
+using namespace std;
+
+int main (int argc, char **argv)
+{
+    png::image <png::rgb_pixel> png_image (argv[1]);
+
+    int size = png_image.get_width() * png_image.get_height();
+    
+    Perceptron* p = new Perceptron (3, size, 256, size);
+
+    double* image = new double[size];
+
+    double* copyImage = (*p) (image);
+
+    for(int i = 0; i < png_image.get_width(); ++i)
+        for(int j = 0; j < png_image.get_height(); ++j)
+            png_image[i][j].red = copyImage[i*png_image.get_width()+j];
+
+
+    for(int i = 0; i < png_image.get_width(); i++)
+    {
+        for(int j = 0; j < png_image.get_height(); j++)
+        {
+            if((int)png_image[i][j].red < 50 && (int)png_image[i][j].green < 50  && (int)png_image[i][j].blue < 50)
+            {
+             
+              png_image[i][j].red = rand() % 255 + 0;
+              png_image[i][j].green = rand() % 255 + 0;
+              png_image[i][j].blue = rand() % 255 + 0;
+            }
+        } 
+    }
+
+    png_image.write("modified.png");
+    
+    delete p;
+
+    delete [] image;
+
+}
+        ]]>
+        </programlisting>
+<figure>
+            <title>Módosított Mandelbrot-halmaz képe.</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/modified.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
 </section>
 
 </chapter>
