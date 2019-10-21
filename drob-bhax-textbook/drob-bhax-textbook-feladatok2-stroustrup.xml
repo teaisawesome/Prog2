@@ -1,6 +1,6 @@
 <chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
     <info>
-        <title>Helló, Liskov!</title>
+        <title>Helló, Stroustrup!</title>
         <keywordset>
             <keyword/>
         </keywordset>
@@ -10,27 +10,547 @@
 Java, C#) és 6. hét Típusok tagjai: mezők, (nevesített) konstansok,
 tulajdonságok, metódusok, események, operátorok, indexelők,
 konstruktorok, destruktorok, beágyazott típusok.</title>
-<para>...</para>
+<para>
+    Az OOP-ban a mezők az osztályok adattagjai. Ezek az osztály működését általában meghatározzák így nem célszerű ha az értékük szabadon változtathatjuk.
+    Ezért célszerű ezeknek az adattagoknak korlátozni az elérését tipikusan private accessorral. A konstansok olyan nem mutable változók, amelyek értéka a program teljes
+    életciklusa alatt nem változtatható. Tipikus példa a PI érték kiemelése konstansként vagy épp a statikus MAX értékek. A tulajdonságok vagy property-k C#-ban tipikus implementáció található.
+    Ezeket getter, setter-ek amelyek az osztály adattagjaihoz biztosít elérést metóduson keresztül. Ezekkel változtatni vagy ki tudjuk venni az értékeket.
+    A metódus olyan kódblokk, amely utasításokat tartalmaz. Két fajtájuk van az eljárás és a függvény. Az eljárásnak nincs visszatérési értéke míg a függvénynek van.
+    Minden metódusnak van visszatérési értéke, neve és paraméterei. A C# ban létezik beépített events, amelyek a különböző action-ökre (gomblenyomás, kattintás stb.)
+    reagál. Az alkalmazásoknak reagálniuk kell ezekre az eventekre, amikor azok bekövetkeznek. Pl.: Ha megnyomjuk a Belépés gombot akkor írja ki, hogy logged.
+    Az operátorok olyan beépített speciális karakterek, amelyek műveletek hajtanak végre. Vannak egyoperandusú, kétoperandusú operátorok. Operátorok többek között a matemaikai-, logikai-, kapcsolati- operátorok.
+    Konstruktor olyan speciális metódus, amely az osztály példányasításakor automatikusan lefut. A definícióban az neve az osztály nevével azonos. Hogy példányasításkor melyik konstruktor fog lefutni,
+    az a paraméter-, számától vagy épp típusától függ. A destruktor fogja felszabadítani az erősforrásokat.
+</para>
  </section>
 <section>
 <title>JDK osztályok</title>
-<para>...</para>
+<para>
+    Ebben a feladatban a JDK src.zip file-ból kellett kiírni a .java kiterjesztésű osztályokat. A feladat egy bizonyos fénykard programra épül.
+    Hogy miért ez a neve ne kérdezze senki. A programnak végig kell iterálnia a saját mappán belül elhelyezett/kicsomagolt src könyvtáron és kiírnia a .java fileokat. Ebben segítset nyújtott a boost filesystem és filestream könyvtár.
+    A kód így nézne ki:
+</para>
+<programlisting language="c++">
+<![CDATA[
+#include <stdio.h>
+#include <string>
+#include <vector>
+#include <iostream>
+
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+
+using namespace std;
+
+void readJavaExt ( boost::filesystem::path path, vector<string> & classes )
+{
+        if ( is_regular_file ( path ) )
+        {
+
+                std::string ext ( ".java" );
+                if ( !ext.compare ( boost::filesystem::extension ( path ) ) )
+                {
+
+                        classes.push_back(path.string());
+
+                }
+
+        }
+        else if ( is_directory ( path ) )
+            for ( boost::filesystem::directory_entry & entry : boost::filesystem::directory_iterator ( path ) )
+                readJavaExt ( entry.path(), classes );
+
+}
+vector<string> getClass (string path)
+{
+    vector <string> classes;
+
+    boost::filesystem::path root (path);
+    
+    readJavaExt(root, classes);
+    
+    return classes;
+}
+
+int main(int argc, char const * argv[])
+{
+
+    boost::filesystem::path full_path(boost::filesystem::current_path());
+
+    string root = full_path.string() + "/" + "src";
+
+    vector<string> roots = {root};
+
+    vector<string> classes = getClass ( root );
+
+    
+    for(const auto & i : classes)
+    {
+        cout << i << endl;
+    }
+    cout << "------------------------------------------------------------------\n";
+    cout << "Összesen " << classes.size() << " .java file található az src-ben.\n";
+
+    return 0;
+}
+]]>
+        </programlisting>
+        <para>
+            A <function>vector &lt; string &gt; getClass (string path)</function> fogja visszaadni azt a string vektort amely tartalmazni 
+            fogja az abszolút elérést az egyes .java fileoknál. Paraméterként megkapja a root elérést. Létrehozunk egy string vektort, amivel visszatérünk.
+            Majd meghívjuk a <function>readJavaExt(root, classes)</function> függvényt, ami elvégzi a tényleges keresést végzi.
+        </para>
+        <para>
+            A JreadJavaExt(root, classes) két paramétert vár. A root-ot fogja felhasználni a root elérés meghatározásához, ez azért szerencsés mert nem statikus az elérés, hanem bármilyen elérést meg tudunk adni.
+            A classes pedig egy referencia, ami a getClass függvényben definiált vektor referenciája lesz. A törzsben vizsgáljuk: ha fájlelérést kapunk akkor megnézzünk, hogy .java-e a kiterjesztése.
+            Ha igen akkor belerakjuk a vektorba. Ez a: <function>classes.push_back(path.string());</function> Ha viszont könyvtár elérést kapunk, akkor egyel bentebb megyünk a könyvtárstruktúrán majd rekurzívan újrahívjuk a függvényt.
+        </para>
+        <para>
+            A main-be először meghatározzuk az aktuális root elérést: <function>boost::filesystem::path full_path(boost::filesystem::current_path());</function> Ezután egy vektorba beletetsszük az összes .java osztályt a getClass() metódus segítségével. Ezen a vektoron végigiterálva kiiratjuk az összes osztály elérését. Amit az alábbi kép is mutat:
+        </para>
+        <figure>
+                <title>JDK osztályok</title>
+                <mediaobject>
+                    <imageobject>
+                    <imagedata fileref="img/src-classes.png" format="PNG"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
 </section>
 <section>
 <title>Másoló-mozgató szemantika</title>
-<para>...</para>
+<para>
+    Feladatként egy választott kódcsipetből kellett elmagyarázni a másoló-,mozgató- konstruktor és szemantika működését.
+    A feladatot egy verem tulajdonságait implementáló példaprogram segítségével készítettem el.
+    Amikor egy objektumról szeretnénk másolatot készíteni akkor jöhet képbe a mozgató konstruktor. A mozgató konstruktor egy referenciát vár paraméterül, amely megegyezik a osztály típusával.
+    Célja a másolat létrehozása. Alapból, ha nem készítünk saját implementációt akkor a fordító automatikusan bitenkénti másolást végez.
+    Ez ugyan létrehozza a másolatot viszont mindkét másolandó tartalom pointere ugyanazon memóriaterületre fog hivatkozni. Ez viszont egy hibás működés. Ezt a másolást sekély másolásnak (shallow copy)-nak hívjuk.
+    Ha implementálunk egy saját másoló konstruktort akkor a fordító azt fogja használni. Mély másolásnak (deep copy) nevezzünk azt, amikor a dinamikus adattagokat másoljuk.
+    Ezek külön dinamikus memóriacímmel másolódnak így nem lesz azonos hivatkozás. A másoló 
+</para>
+<programlisting language="c++">
+<![CDATA[
+stack::stack(const stack & s) : cap(s.cap), sz(s.sz), v(nullptr)
+{
+  std::cout << __PRETTY_FUNCTION__ << "[" << this << "] [" << &s << "]"<< std::endl;
+
+  v = new value_type [cap]; //lefoglalunk egy uj v példányt
+
+  value_type *dst = v;
+  value_type *begin = s.v;
+  value_type *end = begin + s.sz;
+
+  for (value_type *src = begin; src != end; src++)
+  {
+    *(dst++) = *src;
+  }
+}
+]]>
+</programlisting>
+<para>
+    A másoló konstruktor egy bal érték referenciát kap paraméterül. A készülő stack objektum cap és sz adattagjai a másolt objektum értékeit kapja meg. A készülő v tagot meg kinullázzuk.
+    A törzsben elsőként lefoglalunk a v-nek egy új példányt. Ezt követi egy úgynevezett iterátoros bejárás, amely végigiterál az s objektumon és a megfelelő értékeket beállítja.
+    Végül az src dereferenciával megkapjuk a másolt példányt.
+</para>
+<para>
+    A másoló értékadás (copy assignment)  a következőként működik:
+</para>
+<programlisting language="c++">
+<![CDATA[
+stack & stack::operator = (const stack & s)
+{
+  std::cout << __PRETTY_FUNCTION__ << "[" << this << "] [" << &s << "]"<< std::endl;
+
+  if(cap != s.cap)
+  {
+    delete [] v;
+    cap = s.cap;
+    v = new value_type [cap];
+  }
+
+  sz = s.sz;
+
+  value_type *dst = v;
+  value_type *begin = s.v;
+  value_type *end = begin + s.sz;
+
+  for (value_type *src = begin; src != end; src++)
+  {
+    *(dst++) = *src;
+  }
+
+  return *this;
+}
+]]>
+</programlisting>
+<para>
+        Hasonlóan balérték referenciát kap paraméterként. A törzsben egy check következik, ahol megnézem, hogy a stack mérete megegyezik-e a másolandó méretével.
+        Ha nem akkor törlöm a régi verem objektumot, majd az új mérettel létrehozok egy újat. Ugyanígy következik egy iterátoros bejárás, majd végül visszatérünk az objektummal.
+        * Hasonló megoldást használ az std::copy(...) is.
+    </para>
+<para>
+    A mozgató konstruktor (move ctor) paraméterként egy jobbérték referenciát vár, amelyet egy &amp;&amp; jelöl. A mozgatás lényege, hogy egy objektum erőforrásait elvesszük azon célból,
+    hogy hozzákapcsoljuk egy másik objektumhoz anélkül, hogy új területet foglalnánk. Az áthelyezés után már nincs szükség arra az objektumra, akitől elvettük. Célszerű alkalmazni olyan
+    esetekben, amikor ideiglenes, megsemmisítés előtt álló objektumtól akarjuk elvenni az erőforrásokat. A move ctor kód:
+</para>
+<programlisting language="c++">
+<![CDATA[
+stack::stack(stack && s) : cap(s.cap), sz(s.sz), v(s.v)
+{
+  std::cout << __PRETTY_FUNCTION__ << "[" << this << "] [" << &s << "]"<< std::endl;
+
+  s.cap = 0;
+  s.sz = 0;
+  s.v = nullptr;
+}
+]]>
+        </programlisting>
+<para>
+    A kódban jól látszik, hogy a tényleges s objektum értékeit hozzárendeljük az új stack tagjaihoz. Majd a törzsben a régi s objektum értékeit kinullázzuk.
+    A mozgató szemantikánál hasonlóan felszabadítjuk a régi objektumot úgy, hogy áthúzzuk minden egyes tagját. Végül visszatérünk az új stack objektummal. A move assignment kódja:
+</para>
+<programlisting language="c++">
+<![CDATA[
+stack & stack::operator = (stack && s)
+{
+  std::cout << __PRETTY_FUNCTION__ << "[" << this << "] [" << &s << "]"<< std::endl;
+
+  delete [] v;
+
+  cap = s.cap;
+  sz = s.sz;
+  v = s.v;
+
+  s.cap = 0;
+  s.sz = 0;
+  s.v = nullptr;
+
+  return *this;
+}
+]]>
+</programlisting>
+<para>A main függvény az alábbi módon néz ki a programban:</para>
+<programlisting language="c++">
+        <![CDATA[
+#include <iostream>
+#include <stdexcept>
+#include <algorithm>
+
+#include "stack.h"
+
+stack f(stack const & s)
+{
+    stack result = s;
+    result.push(333);
+    return result;
+}
+
+int main()
+{
+    std::cout << "stack a(4);\n";
+    stack a(4);
+    
+    std::cout << "stack b = f(a);\n";
+    stack b = f(a);
+
+    std::cout << "b = f(a);\n";
+    b = f(a);
+    
+    std::cout << "stack c = std::move(f(a))" << '\n';
+    stack c = std::move(f(a));
+
+    std::cout << "return 0" << '\n';
+    return 0;
+}
+        ]]>
+        </programlisting>
+<figure>
+        <title>A main eredményei</title>
+        <mediaobject>
+            <imageobject>
+            <imagedata fileref="img/move-copy.png" format="PNG"/>
+            </imageobject>
+        </mediaobject>
+    </figure>
 </section>
 <section>
 <title>Hibásan implementált RSA törése</title>
-<para>...</para>
+<para>
+    Feladat az volt, hogy gyakoriás alapú törést egy hibásan implementált RSA kódolóra. Ehhez a feladathoz szükség volt az RSA kódolás elméleti hátterére.
+    Ehhez az ajánlott Java 2 útikalauz programozónak 2. kötetéből (91-96, 131-133) megnéztem az elméletet és az implementációt. Továbbá sok hasznos infót találtam a wikipédián is.
+    Az elkészített RSA .java az alábbi:
+</para>
+<programlisting language="java">
+<![CDATA[
+
+import java.io.*;
+import java.math.BigInteger;
+import java.util.Random;
+
+import java.euklidesziAlgoritmus;
+
+
+public class Main
+{
+
+    public static void main(String[] args) throws UnsupportedEncodingException {
+        
+            int meretBitekben = 100;
+            BigInteger p = new BigInteger(meretBitekben, 100, new Random());
+            BigInteger q = new BigInteger(meretBitekben, 100, new Random());
+            BigInteger phiN;
+            BigInteger d, e;
+            BigInteger n = p.multiply(q);
+            StringBuffer decoded = new StringBuffer();
+
+
+            euklidesziAlgoritmus euk = new euklidesziAlgoritmus();
+
+            phiN = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE));
+
+            int max = phiN.bitCount();
+
+            do {
+                d = new BigInteger(max, new Random());
+            }
+            while (!euk.LKO(phiN, d).equals(BigInteger.valueOf(1)));
+
+            e = d.modInverse(phiN);
+            System.out.println("p: " + p);
+            System.out.println("q: " + q);
+            System.out.println("n: " + n);
+            System.out.println("d: " + d);
+            System.out.println("e: " + e);
+            System.out.println();
+
+            String text = "The canonical blobfish picture elicits squeals of delight and shudders of horror, embodying an eye-" +
+                    "catching blend of cute and ugly somewhat unfamiliar to the Western aesthetic (although it's rather " +
+                    "popular in Japan). With its derpy frown, glistening flesh and an impossibly human-looking nose " +
+                    "reminiscent of the schnoz on Ziggy and Kilroy drawings, the fish was an internet star just " +
+                    "waiting to happen.\n" +
+                    "While these days the blobfish has enough face recognition to make other arguably more charismatic " +
+                    "creatures envious, researchers know very little about this enigmatic species. Scientists must infer " +
+                    "how it spends its days and what it eats from the physical characteristics of the blobfish's environment" +
+                    " and the biological features of fellow deep-sea fish. Ironically, the animal's marquee feature — its " +
+                    "signature flab — is not what sets it apart; rather, that's a commonality the fish shares with many " +
+                    "other denizens of the deep.";
+
+            System.out.println("A kódolt szöveg: \n" + text + "\n");
+            text = text.toLowerCase();
+            byte[] buffer = text.getBytes("US-ASCII");
+            BigInteger[] titkos = new BigInteger[buffer.length];
+
+            for (int i = 0; i < titkos.length; i++) {
+                titkos[i] = new BigInteger(new byte[]{buffer[i]});
+                titkos[i] = titkos[i].modPow(e, n);
+                System.out.println(new String(titkos[i].toByteArray()) + "\n");
+            }
+
+
+            for (int i = 0; i < titkos.length; i++) {
+                titkos[i] = titkos[i].modPow(d, n);
+                decoded.append(new String(titkos[i].toByteArray()));
+            }
+
+            System.out.println("\nA dekódolt szöveg: \n" + decoded);
+    }
+}
+]]>
+</programlisting>
+<para>
+    Először két bigInteger számot generálunk, amit a p és q prímszámok lesznek. Ennek a két prímnek a szorzata fogja megadni, az n-et. Az n lesz a modulusa a public és private kulcsoknak.
+    A <function>phiN = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE));</function> fogja megadni az n re vett relatív prím-ek számát adja meg.
+    A <function>d = new BigInteger(max, new Random());</function> fogja tartalmazni a titkos kulcsot, amit a felti kódban egy while loop-al állítok elő. A <function>e = d.modInverse(phiN);</function> fogja megadni a nyivános kulcsot.
+    A példakód egy string literált titkosít az egyszerűség kedvéért. A szöveget ASCII byte megfelelőjét betöltjük egy buffer-ba. A bufferből kivesszük az elemeket és a <function>titkos[i] = titkos[i].modPow(e, n);</function> titkos tömbbe a már 
+    nyilvános kulcs n hatványra emelt byteja fog kerülni. A decryption (visszafejtés) ugyanilyen módszerrel történik csak a privát kulcsot emeljük n-re. És végül visszakaptuk a titkosított szöveget.
+</para>
+<para>A programban a legnagyobb közös osztó meghatározásához egy euklidesziAlgoritmus implementációt használtam. A kódja:</para>
+<programlisting language="c++">
+<![CDATA[
+import java.math.BigInteger;
+
+public class euklidesziAlgoritmus
+{
+    public  BigInteger counter = BigInteger.ZERO;
+    public  BigInteger x = BigInteger.ZERO;
+    public  BigInteger y = BigInteger.ONE;
+    public  BigInteger previousX = BigInteger.ONE;
+    public  BigInteger previousY = BigInteger.ZERO;
+    public  BigInteger newX;
+    public  BigInteger newY;
+    public  BigInteger maradek = BigInteger.ONE;
+    public  BigInteger q = BigInteger.ONE;
+
+
+    public BigInteger LKO(BigInteger firstNumber, BigInteger secondNumber) {
+        BigInteger tmp = BigInteger.valueOf(0);
+        if (secondNumber.compareTo(firstNumber) == 1) {
+            tmp = secondNumber;
+            secondNumber = firstNumber;
+            firstNumber = tmp;
+        }
+
+        tmp = BigInteger.valueOf(0);
+
+        BigInteger osztja = BigInteger.valueOf(0);
+        while (!secondNumber.equals(BigInteger.ZERO)) {
+            tmp = secondNumber;
+            osztja = firstNumber.divide(secondNumber);
+            secondNumber = firstNumber.mod(secondNumber);
+            firstNumber = tmp;
+        }
+        return firstNumber;
+    }
+}
+]]>
+        </programlisting>
 </section>
 <section>
-<title>JDK osztályok</title>
-<para>...</para>
+<title>Változó argumentumszámú ctor</title>
+<para>Ebben a feladatban a Perceptron-t kellett ismét elővenni. Az osztályt úgy kellett alakítani, hogy ne egy számmal térjen vissza hanem egy hasonló méretű pixeltömbbel.
+        Majd ezt felhasználva készítünk egy az eredeti képpel megegyező méretű képet.
+    </para>
+<programlisting language="c++">
+<![CDATA[
+Perceptron ( int nof, ... )
+{
+    n_layers = nof;
+    
+    units = new double*[n_layers];
+    n_units = new int[n_layers];
+    
+    va_list vap;
+    
+    va_start ( vap, nof );
+    
+    for ( int i {0}; i < n_layers; ++i )
+    {
+        n_units[i] = va_arg ( vap, int );
+        
+        if ( i )
+            units[i] = new double [n_units[i]];
+    }
+    
+    va_end ( vap );
+    
+    weights = new double**[n_layers-1];
+    
+    #ifndef RND_DEBUG
+    std::random_device init;
+    std::default_random_engine gen {init() };
+    #else
+    std::default_random_engine gen;
+    #endif
+    
+    std::uniform_real_distribution<double> dist ( -1.0, 1.0 );
+    
+    for ( int i {1}; i < n_layers; ++i )
+    {
+        weights[i-1] = new double *[n_units[i]];
+        
+        for ( int j {0}; j < n_units[i]; ++j )
+        {
+            weights[i-1][j] = new double [n_units[i-1]];
+            
+            for ( int k {0}; k < n_units[i-1]; ++k )
+            {
+                weights[i-1][j][k] = dist ( gen );
+            }
+        }
+    }
+}
+]]>
+</programlisting>
+<para>Mint látható a Perceptron konstruktor paraméterében egy furcsa megadás van. <function>Perceptron ( int nof, ... )</function>
+    Ezt a megadási módot úgy hívjuk, hogy vátozó számú paraméter lista. Az <function>int nof</function> paraméter változó fogja megmondani a tényleges paraméter számot. Ezután egy ... jelölés következik.
+    Ahhoz, hogy dolgozni tudjuk a paraméterekkel 1 típus és 3 metódus áll a rendelkezésünkre. A va_list definiálja a változó típust. Ezen típussal deklarált változó fogja hordozni a paraméter változókról az információt.
+    A <function>va_start()</function> inicializálja a változókat. A <function>va_args()</function> fogja visszaadni a paraméter változókat. Ez így nézhet ki: str=va_arg(vl,char*). A felhasználás végén pedig kötelezően
+    le kell zárni a va_end() metódussal a paraméter listát. Ezeket az alkotókat láthatjuk a fenti kódban is.
+</para>
+<para>A main.cc kódja sokat nem változott az előző hetihez képest. Viszont az jól látszik, hogy itt kihasználtunk a paraméterlista előnyeit. 
+    A Perceptron konstruktora 4 paramétert fog továbbpasszolni majd ezekkel különböző műveletek hajtódnak végre: <function>Perceptron* p = new Perceptron (3, size, 256, size)</function>
+</para>
+
+<programlisting language="c++">
+<![CDATA[
+int main (int argc, char **argv)
+{
+    png::image <png::rgb_pixel> png_image (argv[1]);
+
+    int size = png_image.get_width() * png_image.get_height();
+    
+    Perceptron* p = new Perceptron (3, size, 256, size);
+
+    double* image = new double[size];
+
+    double* copyImage = (*p) (image);
+
+    for(int i = 0; i < png_image.get_width(); ++i)
+        for(int j = 0; j < png_image.get_height(); ++j)
+            png_image[i][j].red = copyImage[i*png_image.get_width()+j];
+
+
+    for(int i = 0; i < png_image.get_width(); i++)
+    {
+        for(int j = 0; j < png_image.get_height(); j++)
+        {
+            if((int)png_image[i][j].red < 50 && (int)png_image[i][j].green < 50  && (int)png_image[i][j].blue < 50)
+            {
+             
+              png_image[i][j].red = rand() % 255 + 0;
+              png_image[i][j].green = rand() % 255 + 0;
+              png_image[i][j].blue = rand() % 255 + 0;
+            }
+        } 
+    }
+
+    png_image.write("output.png");
+    
+    delete p;
+
+    delete [] image;
+
+}
+    
+        ]]>
+        </programlisting>
+        <figure>
+                <title>Mint látható megegyezik a két kép mérete.</title>
+                <mediaobject>
+                    <imageobject>
+                    <imagedata fileref="img/para-list.png" format="PNG"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
 </section>
 <section>
-<title>JDK osztályok</title>
-<para>...</para>
+<title>Összefoglaló</title>
+<para>Az összefoglalót az RSA ról készítettem el, mert erről lehet hosszabban írni. Hasznosnak találtam, mivel </para>
+<para>z RSA-eljárás nyílt kulcsú (vagyis „aszimmetrikus”) titkosító algoritmus, melyet 1976-ban Ron Rivest, Adi Shamir és Len Adleman fejlesztett ki (és az elnevezést nevük kezdőbetűiből kapta).
+    Ez napjaink egyik leggyakrabban használt titkosítási eljárása. Előnye, hogy a titkosítás folyamatát elválasztja a dekódolástól. A titkosítás paramétere vagyis az e és d nem azonos így nem határozható meg a dekódolásra szánt paraméter.
+    Röviden az üzenetet a nyilvános kulcs segítségével kódoljuk, amit visszafejteni csak egy titkos kulcs segítségével lehet.
+    A kulcsokat a következő lépésekből állnak össze:
+    Véletlenszerűen kiválasztunk két nagy (bigInteger) prímszámot ezek a p és q.
+    Következőnek ki kell számolnunk a encrypt és decrypt re szánt modulust, ami az N.
+    Majd φ(N) kiszámoljuk hány relatív prím szám van N-re. Ezt felhasználva készítünk egy e nyilvános kulcsot, ami az lnko(e, φ(N))=1 képletből áll össze.
+    A titkos kulcs egy olyan d * e, amelyet elosztva φ(N)-el 1 maradékot fog adni. Vagyis képlet szerint a következő:
+    de kongruens 1 (mod φ(N)).
+    Tegyük fel, hogy B üzenetet akar küldeni A-nak. B az A személy nyilvános kulcsa segítségével titkosítja az üzenetet.
+    A titkosított c szöveg a publikus kulcs n hatványára emelt m érték vagyis c = m<superscript>e</superscript> mod N.
+    A ezután saját titkos kulcsát, d-t használva vissza tudja fejteni m-et c-ből a következőképpen:
+    m = c<superscript>d</superscript> mod N.
+</para>
+<para> 
+    A kódoló (küldő) és a dekódoló (fogadó) félnek nem kell semmilyen titkos jelszót vagy kulcsot cserélnie egymással a kommunikáció során. Ehelyett minden egyes felhasználó rendelkezik egy kulcspárral, mellyel a biztonságos kommunikáció létrejöhet. Az egyik kulcsot magánkulcsnak (privát kulcsnak), a másikat nyilvános kulcsnak (publikus kulcsnak) nevezzük. (Szakirodalomban használatosak még a „nyilvános és titkos kulcs” kifejezések is.) A két kulcs ugyanazon kulcsgenerálási eljárásból származik, elválaszthatatlanul összetartoznak, de egyik a másikból nem következtethető ki. A magánkulcsot (privát kulcsot) minden felhasználónak titkosan kell kezelnie, míg a nyilvános kulcsot (publikus kulcsot) mindenkivel ismertetni kell, akivel kommunikálni szeretnénk (kulcsadatbázis segítségével). Az aszimmetrikus titkosítás esetén a feleknek nincs szükségük megbízható csatornára vagy személyes találkozásra, csak a kulcs hitelességét, tulajdonosához való tartozását kell bizonyítani.
+</para>
+<figure>
+        <title>RSA működése.</title>
+        <mediaobject>
+            <imageobject>
+            <imagedata fileref="img/rsa.png" format="PNG"/>
+            </imageobject>
+        </mediaobject>
+    </figure>
 </section>
 
 </chapter>
