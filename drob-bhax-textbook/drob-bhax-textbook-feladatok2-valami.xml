@@ -1,0 +1,217 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+    <info>
+        <title>Helló, Valami!</title>
+        <keywordset>
+            <keyword/>
+        </keywordset>
+    </info>
+    <section>
+	<title>FUTURE tevékenység editor</title>
+	<para>...</para>
+    </section>
+<section>
+	<title>OOCWC Boost ASIO hálózatkezelése</title>
+	<para>Ebben a feladatban egy OOCWC kódban kellett bemutatni a <function>sscanf</function> függvény szerepét.
+	Mint a neve elárulja egy beolvasási mechanizmust hajt végre. Ez a függvény egy inputról (stringről) olvassa  be az adatot majd formázottan eltárolja egy megadott elérésre. A nevében lévő f a formatted kulcsszóra utal. Ha nincs alaból elérési útvonal adva akkor a default outputra adja vissza a formázottan beolvasott adatot. Általános formája: <function>int sscanf ( const char * s, const char * format, ...);</function>, ahol a visszatérési érték az eltárolt elemek száma. Ha nem sikerult az adatot olvasni egy EOF-al tér vissza. Egy kódcsipet a példakódból:
+</para>
+<programlisting language="c++">
+<![CDATA[
+%option c++
+%option noyywrap
+
+%{
+#define YY_DECL int justine::robocar::CarLexer::yylex()
+#include "carlexer.hpp"
+#include <cstdio>
+#include <limits>
+%}
+
+INIT	"<init"
+INITG	"<init guided"
+WS	[ \t]*
+WORD	[^-:\n \t()]{2,}
+INT	[0123456789]+
+FLOAT	[-.0123456789]+
+ROUTE	"<route"
+CAR	"<car"
+POS	"<pos"
+GANGSTERS	"<gangsters"
+STAT	"<stat"
+DISP	"<disp>"
+%% 
+
+...
+
+{POS}{WS}{INT}{WS}{INT}{WS}{INT}
+{
+	std::sscanf(yytext, "<pos %d %u %u", &m_id, &from, &to);
+	m_cmd = 10001;
+}
+
+...
+
+]]>
+</programlisting>
+<para>Mint látható egy olyan illesztést várunk, hogy egy POS-al kezdődik majd tabuláltan tagolva mögötte három integer sorakozik. A mi kis sscanf függvényünk egy yytext tárolóba tárolja a formázott értékekeket. Ezután történik a regex kifejezés ami megmondja, hogy formázza az inputot. A string-be úgynevezett formatting escapes-eket (%d vagy %u) használunk. Ezzel megadjuk a beolvasott érték helyét a string-ben. Majd a move command-ot 10001-re állítjuk. A példakód többi részében és hasonlóan működik a sscanf függvény.</para>
+
+    </section>
+<section>
+	<title>SamuCam</title>
+	<para>...</para>
+    </section>
+<section>
+	<title>BrainB</title>
+	<para></para>
+    </section>
+<section>
+	<title>OSM térképre rajzolása</title>
+	<para>A feladat az volt, hogy készítsünk egy saját OSM ábrát. Feladatnak én egy GPS trackert választottam. Lényege, hogy a készített androidos applikáció mp-enként határozza meg az aktuális helyzetemet a Google Maps-en. A helyzetekre rendre markereket helyez el így kialakítva a márt járt utaimat. :)</para>
+<para>Kezdésként Android Studioba létrehoztam egy új projektet azon belül egy Google Maps Activity-t. Minden munkát megelőzően a Google Developer portálon generáltatni kellett egy saját Android SDK-hoz való API kulcsot. Ha ez megvan akkor a létrejött projektben a <function>google_maps_api.xml</function> fileba bemásoltuk az API keyt. Ez szükséges, hogy igénybe tudjuk venni a Google Maps Services-t.
+A program manifest állományban megadtam engedélyként a helyszolgáltatásokat, hiszen ez szolgáltatja majd az helyadatokat a készülékről.
+</para>
+<programlisting language="java">
+<![CDATA[
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.locationtracker">
+
+    <!--
+         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
+         Google Maps Android API v2, but you must specify either coarse or fine
+         location permissions for the 'MyLocation' functionality.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+...
+]]>
+</programlisting>
+<para>A program logikája a <function>MapsActivity.java</function>-ba van megírva. A <function>LocationManager</function> objektum fogja meghívni a készülékünk Location Service-ét.
+<function>locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME, MIN_DIST, locationListener);</function> metódus másodpercenként lekéri a helyzetünket és ha 2 méter távolságot mozdultunk akkor meghívja a locationListener action-t. Ez az action különböző metódusokat implementál. Nekünk a legérdekesebb a <function>onLocationChanged(Location location)</function>. Ez minden egyes pozícióváltásnál kirajzol egy markert a helykoordinátákhoz és még a nézetet is odapozícionálja. Ezzel elértük, hogy minden egyes mozgást figyel az FBI és részletes helyzetjelentést készít. ;) A MapsActivity forrása:
+</para>
+<programlisting language="java">
+<![CDATA[
+package com.example.locationtracker;
+
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.FragmentActivity;
+
+import android.Manifest;
+import android.app.Activity;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Bundle;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+
+    private GoogleMap mMap;
+
+    private LocationListener locationListener;
+
+    private LocationManager locationManager;
+
+    private final long MIN_TIME = 1000; // 1 sec
+    private final long MIN_DIST = 3; // 1 meter
+
+    private LatLng latLng;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_maps);
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PackageManager.PERMISSION_GRANTED);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PackageManager.PERMISSION_GRANTED);
+
+    }
+
+
+    /**
+     * Manipulates the map once available.
+     * This callback is triggered when the map is ready to be used.
+     * This is where we can add markers or lines, add listeners or move the camera. In this case,
+     * we just add a marker near Sydney, Australia.
+     * If Google Play services is not installed on the device, the user will be prompted to install
+     * it inside the SupportMapFragment. This method will only be triggered once the user has
+     * installed Google Play services and returned to the app.
+     */
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+
+        mMap = googleMap;
+
+        locationListener = new LocationListener() {
+
+            @Override
+            public void onLocationChanged(Location location) {
+
+                try
+                {
+                    latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                    mMap.addMarker(new MarkerOptions().position(latLng).title("Robi"));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                }
+                catch (SecurityException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };
+
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+        try
+        {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME, MIN_DIST, locationListener);
+        }
+        catch (SecurityException e)
+        {
+            e.printStackTrace();
+        }
+
+    }
+}
+
+]]>
+</programlisting>
+<figure>
+            <title>GPS Tracker Android Application</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/MaPapp.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+
+    </section>
+
+</chapter>

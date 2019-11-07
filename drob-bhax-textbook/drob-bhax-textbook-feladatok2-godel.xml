@@ -1,0 +1,564 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+    <info>
+        <title>Helló, Godel!</title>
+        <keywordset>
+            <keyword/>
+        </keywordset>
+    </info>
+    <section>
+        <title>Gengszterek</title>
+        <para>A OOCWC projekt gengszterek rendezését kellett megnézni lambda kifejezéssel. Hasonló az STL map-es feladathoz itt is a jól bevált sort lambda kifejezéssel rendezünk. Ez az álábbi módon néz ki:
+</para>
+    <programlisting language="java">
+    <![CDATA[
+std::sort ( gangsters.begin(), gangsters.end(), [this, cop] ( Gangster x, Gangster y )
+{
+    return dst ( cop, x.to ) < dst ( cop, y.to );
+} );
+    ]]>
+    </programlisting>
+<para>Két Gangszter objektumot vár paraméternek majd megézzük a dst ( cop, x.to ) függvény kiszámolja a paraméterként megadott rendőr és gangszter távolságát. Ugyanezt megnézzük y gangszterre. És ha az x gangszter közelebb van a cop-hoz, mint az y gangszter akkor tér vissza igazzal.</para>
+    </section>
+
+<section>
+        <title>C++11 Custom Allocator</title>
+        <para>Ezt a feladatot SKIPPELEM a Tanárúr által kirakott PHP-s skippelési lehetőségével. A feladatot egy új sectionként definiáltam.</para>
+    </section>
+
+
+    <section>
+	<title>STL map érték szerinti rendezése</title>
+    <para>Ebben a feladatban a fénykard rank rendező algoritmusában kellett rámutatni a map érték szerinti rendezésére.
+    A feladat fontos, ha tisztában vagyunk a map-el. Ez egy olyan asszociativ tároló amely kulcs érték - mapped érték párokat tárol. Szintaxisa a következő: <function>std::map 	&lt;std::string, int &gt; &amp;rank</function>. A map-nek különböző segédmetódusai vannak. A feladat szempontjából kettő érdekes. A begin() amely az első elemmel tér vissza a map-ből. Illetve a end() ami visszatér azzal az elemmel ami az utolsót követi. Most lássuk a kódot:
+</para>
+<programlisting language="c++">
+<![CDATA[
+std::vector<std::pair<std::string, int>> sort_map ( std::map <std::string, int> &rank )
+{
+        std::vector<std::pair<std::string, int>> ordered;
+
+        for ( auto & i : rank ) {
+                if ( i.second ) {
+                        std::pair<std::string, int> p {i.first, i.second};
+                        ordered.push_back ( p );
+                }
+        }
+
+        std::sort (
+                std::begin ( ordered ), std::end ( ordered ),
+        [ = ] ( auto && p1, auto && p2 ) {
+                return p1.second > p2.second;
+        }
+        );
+
+        return ordered;
+}
+        ]]>
+        </programlisting>
+<para>
+Mint látható a sort_map függvény paraméterként egy &lt;std::string, int &gt; map-et vár. Általánosságba kulcs érték rendezünk, de most feladatban érték szerint kell rendezni. Ehhez létrehozunk egy hasonló map típusú vektort ordered néven.
+Ebbe a vektorba foreach iterátor segítségével átrakjuk a paraméterként megadott map értékeit a vektorba. Ezt a vektort innenstől könnyen lehet érték szerint rendezni. A sort lambda kifejezéses "kombóval" rendezzük a vektort úgy, hogy a belső iterátornál a p1.second értékét vizsgáljuk. Ha nagyobb, mint a p2.second érték (ami lényegében a tényleges int értékek) akkor lesz a kifejezés igaz. Majd a végén a sort_map függvény visszatér az érték szerint rendezett vektorral.
+</para>
+</section>
+<section>
+	<title>Alternatív Tabella rendezése</title>
+    <para>Feladatként el kellett magyarázni az java.lang
+Interface Comparable&lt;T&gt; szerepét az magyar labdarugó bajnokság alternatív tabelláján. A Comparable&lt;T&gt; egy interface amelyet az implements kulcsszóval tudunk implementálni a classhoz.
+Ez az interface egyetlen függvényt definiál, a <function>public int compareTo(T o);</function>-t. Ez a függvény a paraméterként átadott T objektumot hasonlítja össze egy másik objektummal. Visszatérésként egy számot kapunk a két objektum relációjától függően. Három fajta áll fent: less then (visszaad negatívat), equals(visszaad nullát), greater than(visszaad pozitívat).
+ </para>
+<programlisting language="java">
+<![CDATA[
+class Csapat implements Comparable<Csapat> {
+
+  protected String nev;
+  protected double ertek;
+
+  public Csapat(String nev, double ertek) {
+    this.nev = nev;
+    this.ertek = ertek;
+  }
+
+  public int compareTo(Csapat csapat) {
+    if (this.ertek < csapat.ertek) {
+      return -1;
+    } else if (this.ertek > csapat.ertek) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+}
+        ]]>
+        </programlisting>
+<para>
+Ahogy látható a kódból is implementáltuk a Comparable-t a class Csapatra. Ezután kifejtettük a compareTo(Csapat csapat). Itt az osztály attribútumként megadott ertek-et hasonlítjuk össze a paraméterként átadott Csapat objektum értékével. A már korábban leírt módon történik a visszatérés. A feladat lényegében kész, de szeretném még kiegészíteni a binaryShort API doksiban lévő kódjával és magyarázatával. (ezt megcsinálom csak újrateszem a gépet :D)
+</para>
+</section>
+<section>
+        <title>GIMP Scheme</title>
+        
+        <para>
+            Feladat az volt, hogy a tavalyi gimp scheme króm effectes példát kellett feléleszteni. A program egésze így néz ki:
+        </para>
+        <programlisting language="lisp"><![CDATA[
+            ; bhax_chrome3.scm
+            ;
+            ; BHAX-Chrome creates a chrome effect on a given text.
+            ; Copyright (C) 2019  
+            ; Norbert Bátfai, batfai.norbert@inf.unideb.hu
+            ; Nándor Bátfai, batfai.nandi@gmail.com
+            ;
+            ;    This program is free software: you can redistribute it and/or modify
+            ;    it under the terms of the GNU General Public License as published by
+            ;    the Free Software Foundation, either version 3 of the License, or
+            ;    (at your option) any later version.
+            ;
+            ;    This program is distributed in the hope that it will be useful,
+            ;    but WITHOUT ANY WARRANTY; without even the implied warranty of
+            ;    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+            ;    GNU General Public License for more details.
+            ;
+            ;    You should have received a copy of the GNU General Public License
+            ;    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+            ;
+            ; Version history
+            ;
+            ;  This Scheme code is partially based on the Gimp tutorial 
+            ;  http://penguinpetes.com/b2evo/index.php?p=351 
+            ;  (the interactive steps of this tutorial are written in Scheme)
+            ;
+            ;  https://bhaxor.blog.hu/2019/01/10/a_gimp_lisp_hackelese_a_scheme_programozasi_nyelv
+            ; 
+
+            (define (color-curve)
+                (let* (
+                    (tomb (cons-array 8 'byte))
+                )
+                    (aset tomb 0 0)
+                    (aset tomb 1 0)
+                    (aset tomb 2 50)
+                    (aset tomb 3 190)
+                    (aset tomb 4 110)
+                    (aset tomb 5 20)
+                    (aset tomb 6 200)
+                    (aset tomb 7 190)
+                tomb)    
+            )
+
+            ;(color-curve)
+
+            (define (elem x lista)
+
+                (if (= x 1) (car lista) (elem (- x 1) ( cdr lista ) ) )
+
+            )
+
+            (define (text-wh text font fontsize)
+            (let*
+                (
+                    (text-width 1)
+                    (text-height 1)
+                )
+            
+                (set! text-width (car (gimp-text-get-extents-fontname text fontsize PIXELS font)))    
+                (set! text-height (elem 2  (gimp-text-get-extents-fontname text fontsize PIXELS font)))    
+                
+                (list text-width text-height)
+                )
+            )
+
+            ;(text-width "alma" "Sans" 100)
+
+            (define (script-fu-bhax-chrome text font fontsize width height color gradient)
+            (let*
+                (
+                    (image (car (gimp-image-new width height 0)))
+                    (layer (car (gimp-layer-new image width height RGB-IMAGE "bg" 100 LAYER-MODE-NORMAL-LEGACY)))
+                    (textfs)
+                    (text-width (car (text-wh text font fontsize)))
+                    (text-height (elem 2 (text-wh text font fontsize)))
+                    (layer2)        
+                )
+                
+                ;step 1
+                (gimp-image-insert-layer image layer 0 0)
+                (gimp-context-set-foreground '(0 0 0))
+                (gimp-drawable-fill layer  FILL-FOREGROUND )
+                (gimp-context-set-foreground '(255 255 255))
+            
+                (set! textfs (car (gimp-text-layer-new image text font fontsize PIXELS)))
+                (gimp-image-insert-layer image textfs 0 0)   
+                (gimp-layer-set-offsets textfs (- (/ width 2) (/ text-width 2)) (- (/ height 2) (/ text-height 2)))
+            
+                (set! layer (car(gimp-image-merge-down image textfs CLIP-TO-BOTTOM-LAYER)))
+            
+                ;step 2   
+                (plug-in-gauss-iir RUN-INTERACTIVE image layer 15 TRUE TRUE)
+            
+                ;step 3
+                (gimp-drawable-levels layer HISTOGRAM-VALUE .11 .42 TRUE 1 0 1 TRUE)
+            
+                ;step 4   
+                (plug-in-gauss-iir RUN-INTERACTIVE image layer 2 TRUE TRUE)
+
+                ;step 5    
+                (gimp-image-select-color image CHANNEL-OP-REPLACE layer '(0 0 0))
+                (gimp-selection-invert image)
+
+                ;step 6        
+                (set! layer2 (car (gimp-layer-new image width height RGB-IMAGE "2" 100 LAYER-MODE-NORMAL-LEGACY)))
+                (gimp-image-insert-layer image layer2 0 0)
+
+                ;step 7        
+                (gimp-context-set-gradient gradient) 
+                (gimp-edit-blend layer2 BLEND-CUSTOM LAYER-MODE-NORMAL-LEGACY GRADIENT-LINEAR 100 0 REPEAT-NONE 
+                    FALSE TRUE 5 .1 TRUE width (/ height 3) width  (- height (/ height 3)))
+                
+                ;step 8        
+                (plug-in-bump-map RUN-NONINTERACTIVE image layer2 layer 120 25 7 5 5 0 0 TRUE FALSE 2)
+            
+                ;step 9       
+                (gimp-curves-spline layer2 HISTOGRAM-VALUE 8 (color-curve))
+                
+                (gimp-display-new image)
+                (gimp-image-clean-all image)
+                )
+            )
+
+            ;(script-fu-bhax-chrome "Bátf41 Haxor" "Sans" 120 1000 1000 '(255 0 0) "Crown molding")
+
+            (script-fu-register "script-fu-bhax-chrome"
+                "Chrome3"
+                "Creates a chrome effect on a given text."
+                "Norbert Bátfai"
+                "Copyright 2019, Norbert Bátfai"
+                "January 19, 2019"
+                ""
+                SF-STRING       "Text"      "Bátf41 Haxor"
+                SF-FONT         "Font"      "Sans"
+                SF-ADJUSTMENT   "Font size" '(100 1 1000 1 10 0 1)0"
+
+                SF-VALUE        "Width"     "1000"
+                SF-VALUE        "Height"    "1000"
+                SF-COLOR        "Color"     '(255 0 0)
+                SF-GRADIENT     "Gradient"  "Crown molding"    
+            )
+            (script-fu-menu-register "script-fu-bhax-chrome" 
+                "<Image>/File/Create/BHAX"
+            )
+
+        ]]></programlisting>
+        <para>A program úgy kezdődik, hogy definiálunk egy <function>color-curve</function> függvényt.
+        A let kulcsszóval megadunk egy lokális változót, ami egy 8 elemű tömb lesz.
+        Ezután feltöltjük az értékeit különböző értékekkel. Ez lesz a színátmenetért felelős függvény.</para>
+        <programlisting language="lisp"><![CDATA[
+            (define (color-curve)
+                (let* (
+                    (tomb (cons-array 8 'byte))
+                )
+                    (aset tomb 0 0)
+                    (aset tomb 1 0)
+                    (aset tomb 2 50)
+                    (aset tomb 3 190)
+                    (aset tomb 4 110)
+                    (aset tomb 5 20)
+                    (aset tomb 6 200)
+                    (aset tomb 7 190)
+                tomb)    
+            )
+
+            ;(color-curve)
+        ]]></programlisting> 
+        <para>
+            A függvény 3 paramétert vár. Magát a szöveget, amit formázni szeretnénk. A szöveg betűstílusát illetve a szöveg méretét.
+            <function>set!</function> kulcsszóval beállítunk értékeket a változóknak és a változók globális értékekké válnak.
+            Létrehozunk két változót text-width illetve text-height-t és beállítjuk az értékeiket 1-re. Majd a set!
+            segítségével beállítjuk a további értékeket a paraméterként megkapott 3 érték alapján.
+        </para>
+        <programlisting language="lisp"><![CDATA[
+            (define (text-wh text font fontsize)
+            (let*
+                (
+                    (text-width 1)
+                    (text-height 1)
+                )
+            
+                (set! text-width (car (gimp-text-get-extents-fontname text fontsize PIXELS font)))    
+                (set! text-height (elem 2  (gimp-text-get-extents-fontname text fontsize PIXELS font)))    
+                
+                (list text-width text-height)
+                )
+            )
+
+            ;(text-width "alma" "Sans" 100)
+        ]]></programlisting> 
+        <para>
+            Az alábbi programban fog megtörténni a chrome effect leimplementálása. A sript-fu-bhax-chrome függvény 7 paramétert vár.
+            Ezek a következők:
+            (script-fu-bhax-chrome "formázandó szöveg" "betűstílus" betűméret szélesség magasság színskála "színezési stílus")
+            A továbbiakban írni fogok még róla. Időhiány stb.
+        </para>
+        <programlisting language="lisp"><![CDATA[
+            (define (script-fu-bhax-chrome text font fontsize width height color gradient)
+            (let*
+                (
+                    (image (car (gimp-image-new width height 0)))
+                    (layer (car (gimp-layer-new image width height RGB-IMAGE "bg" 100 LAYER-MODE-NORMAL-LEGACY)))
+                    (textfs)
+                    (text-width (car (text-wh text font fontsize)))
+                    (text-height (elem 2 (text-wh text font fontsize)))
+                    (layer2)        
+                )
+                
+                ;step 1
+                (gimp-image-insert-layer image layer 0 0)
+                (gimp-context-set-foreground '(0 0 0))
+                (gimp-drawable-fill layer  FILL-FOREGROUND )
+                (gimp-context-set-foreground '(255 255 255))
+            
+                (set! textfs (car (gimp-text-layer-new image text font fontsize PIXELS)))
+                (gimp-image-insert-layer image textfs 0 0)   
+                (gimp-layer-set-offsets textfs (- (/ width 2) (/ text-width 2)) (- (/ height 2) (/ text-height 2)))
+            
+                (set! layer (car(gimp-image-merge-down image textfs CLIP-TO-BOTTOM-LAYER)))
+            
+                ;step 2   
+                (plug-in-gauss-iir RUN-INTERACTIVE image layer 15 TRUE TRUE)
+            
+                ;step 3
+                (gimp-drawable-levels layer HISTOGRAM-VALUE .11 .42 TRUE 1 0 1 TRUE)
+            
+                ;step 4   
+                (plug-in-gauss-iir RUN-INTERACTIVE image layer 2 TRUE TRUE)
+
+                ;step 5    
+                (gimp-image-select-color image CHANNEL-OP-REPLACE layer '(0 0 0))
+                (gimp-selection-invert image)
+
+                ;step 6        
+                (set! layer2 (car (gimp-layer-new image width height RGB-IMAGE "2" 100 LAYER-MODE-NORMAL-LEGACY)))
+                (gimp-image-insert-layer image layer2 0 0)
+
+                ;step 7        
+                (gimp-context-set-gradient gradient) 
+                (gimp-edit-blend layer2 BLEND-CUSTOM LAYER-MODE-NORMAL-LEGACY GRADIENT-LINEAR 100 0 REPEAT-NONE 
+                    FALSE TRUE 5 .1 TRUE width (/ height 3) width  (- height (/ height 3)))
+                
+                ;step 8        
+                (plug-in-bump-map RUN-NONINTERACTIVE image layer2 layer 120 25 7 5 5 0 0 TRUE FALSE 2)
+            
+                ;step 9       
+                (gimp-curves-spline layer2 HISTOGRAM-VALUE 8 (color-curve))
+                
+                (gimp-display-new image)
+                (gimp-image-clean-all image)
+                )
+            )
+
+            ;(script-fu-bhax-chrome "Bátf41 Haxor" "Sans" 120 1000 1000 '(255 0 0) "Crown molding")
+        ]]></programlisting>
+<figure>
+            <title>GIMP scheme által kreált króm szöveg.</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/sheme.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+    </section>
+<section>
+        <title>PHP</title>
+        <para>Ebben a feladatban a DEAC 100 hours challenge PHP kódjában kellett asszociatív rendezést végezni. A teljes kód így nézne ki:</para>
+        <programlisting language="php">
+<![CDATA[
+<?php
+session_start();
+if(!(isset($_SESSION["hackerin"]) && $_SESSION["hackerin"] == true))
+{
+header("location: index.php");
+exit;
+}
+$hackername = $_SESSION["hackername"];
+$hackertime = $_SESSION["hackertime"];
+$time = $_GET["time"];
+if(!empty($time))
+{
+$hackertime = $time;
+$hackerfile = "/tmp/".$_SESSION["hackername"];
+file_put_contents($hackerfile, $time);
+}
+?>
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+p {
+margin-top: 0px;
+text-align: center;
+font-size: 55px;
+font-variant: small-caps;
+}
+img {
+display: block;
+margin-left: auto;
+margin-right: auto;
+}
+</style>
+</head>
+<body>
+<p id="ido">Streameljünk 100 óra DEAC játékot!</p>
+<img src = "http://deac.hu/upload/5b376e152b0b5.png" width="300">
+<p id="hanyan" class="smallcap">Hány DEAC-Hackers streamel?</p>
+<div align="center">
+Hajrá, <?php echo $hackername; ?>!
+</div>
+<div align="center">
+<button onclick="refresh100()">FRISSÍT</button>
+<button onclick="stop100()">LEÁLLÍT</button>
+</div>
+<div align="center">
+<?php
+$hackers = array(
+"MatyiBatfai"=>" ",
+"NorbertBatfai"=>" ",
+"BotondLovasz"=>" ",
+"LajosNagy"=>" ",
+"RobiDekany"=>" "
+);
+foreach($hackers as $h => &$p)
+{
+    $hackerfile = "/tmp/".$h;
+    $time = 0;
+    if(file_exists($hackerfile))
+    $time = file_get_contents($hackerfile);
+    $p = $time;
+}
+arsort($hackers);
+foreach($hackers as $h => $p)
+{
+    $hours = (int)($p / (1000*60*60));
+    $minutes = (int)(($p - $hours*1000*60*60) / (1000*60));
+    $seconds = (int)(($p - $hours*1000*60*60 - $minutes*1000*60) / 1000);
+    echo "Hacker: " . $h . ", idő: " . $hours . " óra " . $minutes . " perc " . $seconds . " mp";
+    echo "<br>";
+}
+?>
+</div>
+<script>
+var limit = 1000*60*60*100;
+var limit = 1000*60*60*100;
+var refreshlimit = 1000*60*5;
+var nofhackers = 1;
+var time = <?php echo $hackertime; ?>;
+var localtime = 0;
+setInterval(function() {
+time = time + nofhackers*1000;
+localtime = localtime + 1000;
+var hours = Math.floor(time / (1000*60*60));
+var minutes = Math.floor((time - hours*1000*60*60) / (1000*60));
+var seconds = Math.floor((time - hours*1000*60*60 - minutes*1000*60) / 1000);
+document.getElementById("ido").innerHTML = hours + " óra "
++ minutes + " perc " + seconds + " mp ";
+if(nofhackers==1)
+document.getElementById("hanyan").innerHTML = nofhackers + " hacker streamel";
+else
+document.getElementById("hanyan").innerHTML = nofhackers + " hacker streamel párhuzamosan";
+if (time >= limit) {
+document.getElementById("ido").innerHTML = "A 100 óra stream teljesítve!";
+}
+if(localtime >= refreshlimit){
+localtime = 0;
+refresh100();
+}
+}, 1000);
+function stop100() {
+window.location.href = "stop.php?time=" + time;
+}
+function refresh100() {
+window.location.href = "100.php?time=" + time;
+}
+</script>
+</body>
+</html>
+        ]]>
+        </programlisting>
+    <para>Alapból csak tömbbejárást láthattunk a programban, ami nem rendezi idő szerint a hekkereket. A megfelelő helyeket átírva sikerült idő szerint rendezni az associatív tömböt.</para>
+        <programlisting language="php">
+<![CDATA[
+<?php
+$hackers = array(
+"MatyiBatfai"=>" ",
+"NorbertBatfai"=>" ",
+"BotondLovasz"=>" ",
+"LajosNagy"=>" ",
+"RobiDekany"=>" "
+);
+foreach($hackers as $h => &$p)
+{
+    $hackerfile = "/tmp/".$h;
+    $time = 0;
+    if(file_exists($hackerfile))
+    $time = file_get_contents($hackerfile);
+    $p = $time;
+}
+arsort($hackers);
+foreach($hackers as $h => $p)
+{
+    $hours = (int)($p / (1000*60*60));
+    $minutes = (int)(($p - $hours*1000*60*60) / (1000*60));
+    $seconds = (int)(($p - $hours*1000*60*60 - $minutes*1000*60) / 1000);
+    echo "Hacker: " . $h . ", idő: " . $hours . " óra " . $minutes . " perc " . $seconds . " mp";
+    echo "<br>";
+}
+?>
+        ]]>
+        </programlisting>
+        <para>A kiiratásba kellett kicsit átirni a kódot. Lényegében vannak a hekkerek egy assoc tömbben. Ez a tömb azért kell, hogy hozzárendelük a filerendszerben eltárolt fileokhoz az egyes hekkereket.
+        Én úgy oldottam meg, hogy elősször a már meglévő assoc tömbbe érték párjába beletöltöttem a megfelelő time értékeket. Majd ezt az egészet rendeztem az arsort($hackers) függvénnyel. Majd ahogy az eredeti példában is szépen kiirattam az adatokat. Csináltam egy példakódot, ami szemlélteti kicsiben is. Később megcsinálom az egész programot, mert nem nehéz :)
+</para>
+        <programlisting language="php">
+<![CDATA[
+<?php 
+    $hackers = array(
+    "MatyiBatfai"=>"",
+    "NorbertBatfai"=>"",
+    "DekanyRobert"=>"",
+    "LovaszBotond"=>"",
+    "ValakiMali"=>"",
+    );
+    $a = 0;
+    
+    foreach($hackers as $h => &$p)
+    {
+        $p = 5000000 + $a;
+        $a += 200000;
+    }
+    arsort($hackers);
+    foreach($hackers as $h => $p)
+    {
+        $time = 0;
+        $time = $p;
+        $hours = (int)($time / (1000*60*60));
+        $minutes = (int)(($time - $hours*1000*60*60) / (1000*60));
+        $seconds = (int)(($time - $hours*1000*60*60 - $minutes*1000*60) / 1000);
+        echo "Hacker: " . $h . ", idő: " . $hours . " óra " . $minutes . " perc " . $seconds . " mp";
+        echo "<br>";
+    }
+?>
+        ]]>
+        </programlisting>
+<figure>
+            <title>Tesztkód a hekkerek kiiratására.</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/result.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+        
+
+    </section>
+
+
+</chapter>
