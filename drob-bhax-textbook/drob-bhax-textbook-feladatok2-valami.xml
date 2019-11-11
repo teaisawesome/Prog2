@@ -7,7 +7,55 @@
     </info>
     <section>
 	<title>FUTURE tevékenység editor</title>
-	<para>...</para>
+	<para>Ebben a feladatban a FUTURE-höz létrehozott tevékenységeditoron kellett valamit változtatni. Maga a feladat nem lett volna nehéz viszont a javafx modulokkal sokat bajlódtam. Mint kiderült hiányzott a gépen lévő java11-ből a javafx így manuálisan kellett hozzáadni a compile-hoz. Ehhez egy Makefile-t használtam, amit Molnár Antal Albert készített (tutorált engem). Íme a shellscript:</para>
+<programlisting>
+<![CDATA[
+#!/usr/bin/env bash
+export PATH_TO_FX="/home/drob/Letöltések/javafx-sdk-11.0.2/lib"
+java_modules="javafx.controls,javafx.graphics,javafx.media,javafx.swing,javafx.web"
+rm -f *.class
+/usr/lib/jvm/java-11-openjdk-amd64/bin/javac\
+    --module-path $PATH_TO_FX\
+    --add-modules=$java_modules ActivityEditor.java
+/usr/lib/jvm/java-11-openjdk-amd64/bin/java\
+    --module-path $PATH_TO_FX\
+    --add-modules=$java_modules ActivityEditor
+rm -f *.class
+]]>
+</programlisting>
+<para>Ezt a <function>./run.sh</function> parancsal futtattam. Következőnek hozzáadtam egy css-file-t, hogy a kinézetét testre tudjam szabni. Ehhez a .java-ba az alábbi parancsot kellett addolni: <function>scene.getStylesheets().add("style.css");</function>. Ez hozzácsatolja a már létrehozott style.css fileomat a programhoz. A css file így néz ki:</para>
+<programlisting>
+<![CDATA[
+.root {
+    -fx-accent: #a3be8c;
+    -fx-focus-color: -fx-accent;
+    -fx-base: #eaecc6;
+    -fx-control-inner-background: -fx-base;
+    -fx-control-inner-background-alt: -fx-base;
+}
+.label{ -fx-text-fill: #eceff4; }
+.separator *.line { -fx-background-color: #4c566a;
+    -fx-border-style: solid;
+    -fx-border-width: 3px;
+}
+.scroll-bar{ -fx-background-color: -fx-accent; }
+.button:default { -fx-base: -fx-accent; }
+.table-view {
+    -fx-background-color: derive(-fx-base, 10%);
+    -fx-selection-bar-non-focused: derive(-fx-base, 85%);
+}
+.table-view .column-header .label{ -fx-font-weight: none; } 
+]]>
+</programlisting>
+<para>Illetve kicseréltem az iconokat, amit a végeredmény jól szemléltet.</para>
+<figure>
+            <title>Modified Activity Editor</title>
+            <mediaobject>
+                <imageobject>
+                <imagedata fileref="img/activityeditor.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
     </section>
 <section>
 	<title>OOCWC Boost ASIO hálózatkezelése</title>
@@ -57,11 +105,11 @@ DISP	"<disp>"
     </section>
 <section>
 	<title>SamuCam</title>
-	<para>...</para>
+	<para>Ehhez még próbálom megcsinálni.</para>
     </section>
 <section>
 	<title>BrainB</title>
-	<para></para>
+	<para>Ezt a feladatot skippelem a PHP-s feladattal amit a 6. héten csináltam meg.</para>
     </section>
 <section>
 	<title>OSM térképre rajzolása</title>
