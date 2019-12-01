@@ -276,134 +276,285 @@ int main()
 <section>
 <title>Hibásan implementált RSA törése</title>
 <para>
-    Feladat az volt, hogy gyakoriás alapú törést egy hibásan implementált RSA kódolóra. Ehhez a feladathoz szükség volt az RSA kódolás elméleti hátterére.
-    Ehhez az ajánlott Java 2 útikalauz programozónak 2. kötetéből (91-96, 131-133) megnéztem az elméletet és az implementációt. Továbbá sok hasznos infót találtam a wikipédián is.
-    Az elkészített RSA .java az alábbi:
+    Feladatként egy olyan programot kellett megírni, amely hibásan implementált RSA-ra betű gyakoriság alapján képes valamelyest visszafejteni a titkosított szöveget. Ehhez a Bátfai Tanár Úr RSA programja remek alapot adott. Ezt segédletként megkaptuk a feladathoz. 
+Az RSA hátteréről illetve kifejtéséről az Összefoglaló résznél teszek említést. Itt most a program főbb felépítéseit, magyarázatát taglaljuk.
+</para>
+<para>
+Több részből tevődik össze a program. Elsőként a kulcsokat generáló osztályt írjuk meg. Milyen kulcsokról beszélünk? A publikus és privát kulcsról. Ezek egy komoly matematikai algoritmus segítségével állnak elő. Elősször két BigInteger számot generálunk, amit a p és q prímszámok lesznek. Ennek a két prímnek a szorzata fogja megadni, az N-et. Az N lesz a modolusa a public és private kulcsoknak. A BigInteger z = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE)); fogja megadni az N-re vett relatív prímek számát. A d változó értéke fogja tartalmazni a titkos kulcsot. Az e változó értéke pedig a nyilvános kulcs.
 </para>
 <programlisting language="java">
 <![CDATA[
-
+package rsa;
+import java.math.*;
+import java.util.*;
 import java.io.*;
-import java.math.BigInteger;
-import java.util.Random;
-
-import java.euklidesziAlgoritmus;
 
 
-public class Main
+class KulcsPar
+{
+	BigInteger d, e, m;
+	
+	public KulcsPar()
+	{
+		int meretBitekben = 700 * (int) (Math.log((double)10) / Math.log((double)2));
+		
+		BigInteger p = new BigInteger(meretBitekben, 100, new Random());
+		
+		BigInteger q = new BigInteger(meretBitekben, 100, new Random());
+		
+		m = p.multiply(q);
+		
+		BigInteger z = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));
+		
+		do
+		{
+			do
+			{
+				d = new java.math.BigInteger(meretBitekben, new Random());
+			}
+			while(d.equals(BigInteger.ONE));
+				
+		}
+		while(!z.gcd(d).equals(BigInteger.ONE));
+		
+		e = d.modInverse(z);
+	}
+}
+
+]]>
+        </programlisting>
+<para>
+Ha megvan a kulcsgenerálás jöhet a sima titkosítás. Ez a folyamat a következőképp néz ki: 
+A bufferből kivesszük az elemeket és a titkos tömbbe a már nyilvános kulcs N hatványára elemelt byteja fog kerülni. A decryption ( visszafejtés ) ugyanilyen módszerrel történik csak a privát kulcsot emeljük N-re. ÉS végül visszakaptuk a titkosított szöveget.
+</para>
+<programlisting language="java">
+<![CDATA[
+public class RSA
 {
 
-    public static void main(String[] args) throws UnsupportedEncodingException {
-        
-            int meretBitekben = 100;
-            BigInteger p = new BigInteger(meretBitekben, 100, new Random());
-            BigInteger q = new BigInteger(meretBitekben, 100, new Random());
-            BigInteger phiN;
-            BigInteger d, e;
-            BigInteger n = p.multiply(q);
-            StringBuffer decoded = new StringBuffer();
-
-
-            euklidesziAlgoritmus euk = new euklidesziAlgoritmus();
-
-            phiN = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE));
-
-            int max = phiN.bitCount();
-
-            do {
-                d = new BigInteger(max, new Random());
-            }
-            while (!euk.LKO(phiN, d).equals(BigInteger.valueOf(1)));
-
-            e = d.modInverse(phiN);
-            System.out.println("p: " + p);
-            System.out.println("q: " + q);
-            System.out.println("n: " + n);
-            System.out.println("d: " + d);
-            System.out.println("e: " + e);
-            System.out.println();
-
-            String text = "The canonical blobfish picture elicits squeals of delight and shudders of horror, embodying an eye-" +
-                    "catching blend of cute and ugly somewhat unfamiliar to the Western aesthetic (although it's rather " +
-                    "popular in Japan). With its derpy frown, glistening flesh and an impossibly human-looking nose " +
-                    "reminiscent of the schnoz on Ziggy and Kilroy drawings, the fish was an internet star just " +
-                    "waiting to happen.\n" +
-                    "While these days the blobfish has enough face recognition to make other arguably more charismatic " +
-                    "creatures envious, researchers know very little about this enigmatic species. Scientists must infer " +
-                    "how it spends its days and what it eats from the physical characteristics of the blobfish's environment" +
-                    " and the biological features of fellow deep-sea fish. Ironically, the animal's marquee feature — its " +
-                    "signature flab — is not what sets it apart; rather, that's a commonality the fish shares with many " +
-                    "other denizens of the deep.";
-
-            System.out.println("A kódolt szöveg: \n" + text + "\n");
-            text = text.toLowerCase();
-            byte[] buffer = text.getBytes("US-ASCII");
-            BigInteger[] titkos = new BigInteger[buffer.length];
-
-            for (int i = 0; i < titkos.length; i++) {
-                titkos[i] = new BigInteger(new byte[]{buffer[i]});
-                titkos[i] = titkos[i].modPow(e, n);
-                System.out.println(new String(titkos[i].toByteArray()) + "\n");
-            }
-
-
-            for (int i = 0; i < titkos.length; i++) {
-                titkos[i] = titkos[i].modPow(d, n);
-                decoded.append(new String(titkos[i].toByteArray()));
-            }
-
-            System.out.println("\nA dekódolt szöveg: \n" + decoded);
+	public static void main(String[] args) throws IOException
+	{
+		
+		KulcsPar jSzereplo = new KulcsPar();
+		
+		String tisztaSzoveg = "Jurassic Park is a 1993 American science fiction adventure film directed by Steven Spielberg and produced by Kathleen Kennedy and Gerald R. Molen.";
+		
+		System.out.println("Eredeti szöveg: " + tisztaSzoveg);
+		System.out.print("Visszafejtett szöveg: ");
+		
+		byte[] buffer = tisztaSzoveg.getBytes();
+		
+		BigInteger[] titkos = new BigInteger[buffer.length];
+		
+		for(int i = 0; i < titkos.length; ++i)
+		{
+			titkos[i] = new BigInteger(new byte[] {buffer[i]});
+			titkos[i] = titkos[i].modPow(jSzereplo.e, jSzereplo.m);
+		}
+		
+		for(int i = 0; i < titkos.length; ++i)
+		{
+			titkos[i] = titkos[i].modPow(jSzereplo.d, jSzereplo.m);
+			buffer[i] = titkos[i].byteValue();
+		}
     }
 }
 ]]>
 </programlisting>
-<para>
-    Először két bigInteger számot generálunk, amit a p és q prímszámok lesznek. Ennek a két prímnek a szorzata fogja megadni, az n-et. Az n lesz a modulusa a public és private kulcsoknak.
-    A <function>phiN = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE));</function> fogja megadni az n re vett relatív prím-ek számát adja meg.
-    A <function>d = new BigInteger(max, new Random());</function> fogja tartalmazni a titkos kulcsot, amit a felti kódban egy while loop-al állítok elő. A <function>e = d.modInverse(phiN);</function> fogja megadni a nyivános kulcsot.
-    A példakód egy string literált titkosít az egyszerűség kedvéért. A szöveget ASCII byte megfelelőjét betöltjük egy buffer-ba. A bufferből kivesszük az elemeket és a <function>titkos[i] = titkos[i].modPow(e, n);</function> titkos tömbbe a már 
-    nyilvános kulcs n hatványra emelt byteja fog kerülni. A decryption (visszafejtés) ugyanilyen módszerrel történik csak a privát kulcsot emeljük n-re. És végül visszakaptuk a titkosított szöveget.
-</para>
-<para>A programban a legnagyobb közös osztó meghatározásához egy euklidesziAlgoritmus implementációt használtam. A kódja:</para>
-<programlisting language="c++">
+<para>Ebből hogyan is tudjuk visszafejteni nem megengedett módszerekkel a szöveget? Sehogy! Vagyis van egy módja de ahhoz hibásan kell implementálni az egész folyamatot. Az ötlet az, hogy betűnként titkosítjuk a szöveget. Ekkor a lehetőségek számát belátható minimum alá helyezzük és hasonló lesz a titkosított szöveg. Ilyen esetben gyakoriságot számolva a titkosított szövegből visszakaphatunk valid részleteket az eredeti szövegből. Izgalmas. Lássuk hogyan is néz ez ki:</para>
+<programlisting language="java">
 <![CDATA[
-import java.math.BigInteger;
-
-public class euklidesziAlgoritmus
+    PrintWriter writer = new PrintWriter("output.txt");
+		for(int idx = 0; idx < tisztaSzoveg.length(); ++idx)
+		{
+			Character tisztaszoveg = tisztaSzoveg.charAt(idx);
+			tisztaszoveg =  Character.toLowerCase(tisztaszoveg);
+			byte[] buffer = tisztaszoveg.toString().getBytes();
+			BigInteger[] titkos = new BigInteger[buffer.length];
+			byte[] output = new byte[buffer.length];
+			
+			for(int i = 0; i < titkos.length; ++i)
+			{
+				titkos[i] = new BigInteger(new byte[] {buffer[i]});
+				titkos[i] = titkos[i].modPow(jSzereplo.e, jSzereplo.m);
+				
+				output[i] = titkos[i].byteValue();
+				writer.print(titkos[i]);
+			} 
+			writer.println();
+		}
+		writer.close();
+		
+		
+		
+		BufferedReader inputStream = new BufferedReader(new FileReader("output.txt"));
+		int lines = 0;
+		String line[] = new String[100000];
+		
+		while((line[lines] = inputStream.readLine()) != null)
+		{
+			lines++;
+		}
+		
+		inputStream.close();
+]]>
+</programlisting>
+<para>A karakterek kezeléséhez és a gyakorisági statisztikához egy Karakterek osztályt készítünk. Ebben getter-setter metódusokat implementálunk a karakterekhez és titkosított tartalomhoz. Az increment() eljárás növeli a karakter gyakoriságát illetve a getGyak() visszaadja a tényleges gyakoriságot.</para>
+<programlisting language="java">
+<![CDATA[
+class Karakterek
 {
-    public  BigInteger counter = BigInteger.ZERO;
-    public  BigInteger x = BigInteger.ZERO;
-    public  BigInteger y = BigInteger.ONE;
-    public  BigInteger previousX = BigInteger.ONE;
-    public  BigInteger previousY = BigInteger.ZERO;
-    public  BigInteger newX;
-    public  BigInteger newY;
-    public  BigInteger maradek = BigInteger.ONE;
-    public  BigInteger q = BigInteger.ONE;
-
-
-    public BigInteger LKO(BigInteger firstNumber, BigInteger secondNumber) {
-        BigInteger tmp = BigInteger.valueOf(0);
-        if (secondNumber.compareTo(firstNumber) == 1) {
-            tmp = secondNumber;
-            secondNumber = firstNumber;
-            firstNumber = tmp;
-        }
-
-        tmp = BigInteger.valueOf(0);
-
-        BigInteger osztja = BigInteger.valueOf(0);
-        while (!secondNumber.equals(BigInteger.ZERO)) {
-            tmp = secondNumber;
-            osztja = firstNumber.divide(secondNumber);
-            secondNumber = firstNumber.mod(secondNumber);
-            firstNumber = tmp;
-        }
-        return firstNumber;
-    }
+	private String encrypted;
+	private char karakter = ' ';
+	private int gyakorisag = 0;
+	
+	public Karakterek(String str, char k)
+	{
+		encrypted = str;
+		karakter = k;
+	}
+	
+	public Karakterek(String str)
+	{
+		encrypted = str;
+	}
+	
+	public void setEncrypted(String str)
+	{
+		encrypted = str;
+	}
+	
+	public String getEncrypted()
+	{
+		return encrypted;
+	}
+	
+	public void setKarakter(char k)
+	{
+		karakter = k;
+	}
+	
+	public char getKarakter()
+	{
+		return karakter;
+	}
+	
+	public void increment()
+	{
+		gyakorisag += 1;
+	}
+	
+	public int getGyak()
+	{
+		return gyakorisag;
+	}
 }
 ]]>
-        </programlisting>
+</programlisting>
+<para>A karakterek gyakoriságát az alábbi algoritmus számolja:</para>
+
+
+<programlisting language="java">
+<![CDATA[
+Karakterek kar[]  = new Karakterek[1000];
+	
+		boolean found;
+		kar[0] = new Karakterek(line[0]);
+		int count = 1;
+		
+		for(int i = 1; i < lines; i++)
+		{
+			found = false;
+			for(int j = 0; j < count; j++)
+			{
+				if(kar[j].getEncrypted().equals(line[i]))
+				{
+					kar[j].increment();
+					found = true;
+					break;
+				}
+			}
+			if(!found)
+			{
+				kar[count] = new Karakterek(line[i]);
+				count++;
+			}
+		}
+		
+		for(int i = 0; i < count; i++)
+		{
+			for(int j = i + 1; j < count; j++)
+			{
+				if(kar[i].getGyak() < kar[j].getGyak())
+				{
+					Karakterek x = kar[i];
+					kar[i] = kar[j];
+					kar[j] = x;
+				}
+			}
+		}
+]]>
+</programlisting>
+<para>
+A kar[] tömbbe kerülnek az egyes Karakter objektumok. Egy forciklussal végigiterálunk az output.txt titkosított szöveget tartalmazó file-on és a Karakter osztály segéd metódusaival elkészítjük a gyakoriságot. Ezután következik a sorba rendezés. Ha megnézzük hogyan is megy a betű gyakoriság amelyhez viszonyítani akarjuk akkor csökkenő sorrendbe vannak rendezve az egyes betűk. Ezt nekünk is megkell tennünk a készített objektumainkon így meg is tettük. A javasolt betű gyakoriság elkészítéséhez a javasolt oldalt használtam: <link xlink:href="https://mdickens.me/typing/letter_frequency.html">https://mdickens.me/typing/letter_frequency.html</link>
+</para>
+<programlisting language="java">
+<![CDATA[
+BufferedReader f = new BufferedReader(new FileReader("gyak.txt"));
+		
+		char[] karakter = new char[31];
+		//char[] karakter = new char[69];
+		int karCount = 0;
+		String k;
+		
+		while((k = f.readLine()) != null)
+		{
+			karakter[karCount] = k.charAt(0);
+			karCount++;
+		}
+		f.close();
+		
+		for(int i = 0; i < count; i++)
+		{
+			kar[i].setKarakter(karakter[i]);
+		}
+		
+		for(int i = 0; i < lines; i++)
+		{
+			for(int j = 0; j < count; j++)
+			{
+				if(line[i].equals(kar[j].getEncrypted()))
+				{
+					System.out.print(kar[j].getKarakter());
+				}
+			}
+		}
+		System.out.println();
+]]>
+</programlisting>
+<para>A kész gyak.txt-t beolvastam egy karakterek char típusú tömbbe majd ezt felhasználva egy ciklussal összevetettem a titkosított gyakorisággal.
+Íme az eredmény, amely nem az igazi de hellyel-közzel fellelhető valami:
+</para>
+<figure>
+                <title>Végeredmény a hibásan implemetált RSA-ra.</title>
+                <mediaobject>
+                    <imageobject>
+                    <imagedata fileref="img/rsa_1.png" format="PNG"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+<para>Továbbiakban Feri mondta, hogy készíthetünk a saját gyakoriságot a titkosítandó szövegre. Én ezt el is készítettem a <link xlink:href="https://www.browserling.com/tools/letter-frequency">https://www.browserling.com/tools/letter-frequency</link> oldal segítségével majd a gyak.txt-t erre átírva a következő eredményt kaptam:
+</para>
+<figure>
+                <title>Végeredmény saját gyakorisággal.</title>
+                <mediaobject>
+                    <imageobject>
+                    <imagedata fileref="img/rsa_2.png" format="PNG"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+<para>Ennél már sokkal jobban kivehető mi is volt az eredeti szöveg. :)</para>
+
 </section>
 <section>
 <title>Változó argumentumszámú ctor</title>

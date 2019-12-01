@@ -1,0 +1,379 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+    <info>
+        <title>Helló, Calvin!</title>
+        <keywordset>
+            <keyword/>
+        </keywordset>
+    </info>
+<section>
+<title>Multiparadigmás nyelvek. Programozás multiparadigmás nyelveken.</title>
+<para>
+A programozási nyelveket főképp a nyelv által használt paradigma szerint osztályozzuk. Ilyen pl.: A Java egy magasszintű objektum-orientált programozási nyelv. Sokféle paradigmát különböztetünk meg és párról már említést is tettünk a könyv írása során. A nyelv által használt paradigma meghatározza a nyelv funkcionalitását és elemeit. A multiparadigmás nyelvek több paradigma használnak illetve ezek határozzák meg a funkcióit. Ezek többrétegű feladatok megoldására alkalmasak, amelyek alapból több paradigma keveredésével tevődik össze. A programozó az adott feladat megoldásához több paradigma közül válogathat így elmosva az egyes paradigmák között elhúzódó határokat.
+</para>
+</section>
+    <section>
+	<title>MNIST</title>
+<para>
+Ebben a csokorban a gépi tanulás világával fogunk megismerkedni. Elsőként az MNIST-el. Ez egy hatalmas dataset amelyben 0-9 -ig terjedő kézzel írott számjegyek vannak. 28x28 px méretű képek szürkeárnyalatos ként vannak ábrázolva. 60.000 training- és 10.000 tanító képet tartalmaz. Ezeket tipikusan a gépi tanulás számos területén alkalmazzák.
+</para>
+<figure>
+    <title>MNIST dataset.</title>
+    <mediaobject>
+        <imageobject>
+        <imagedata fileref="img/MnistExamples.png" format="PNG"/>
+        </imageobject>
+    </mediaobject>
+</figure>
+<para>MNIST-et felhasználva készítsünk el egy olyan programot, amely saját írott számunkat képes felismerni. Ezt a Tensorflow open-source AI könyvtár, amely segít megvalósítani az ehhez a feladathoz szükséges komponenseket. A Tensorflow esszenciális részét képezi a python megléte. így ha még nem tettük meg a szükséges függőségek telepítését, tegyük meg! Ehhez nagy segítséget nyújt a Tensorflow hivatalos oldala. A kódok készítésére és szerkesztésére a Jupyter alkalmazást használtam, amely elég elterjedt az egyes gépi-tanulásos feladatra.</para>
+<para>Egy hagyományos többrétegű neurális háló egy bemeneti(input), egy kimeneti (output) és rejtett (hidden) rétegekből állnak össze. Az egyes rétegek között teljes a kapcsolat, amely azt jelenti, hogy minden pont, minden ponttal össze van kötve. Az egyes bemenetek különböző súlyokkal vesznek részt a kimenet meghatározásában. Ezután a súlyokat egy aktivációs függvényre alkalmazva 0-1 közötti lebegőpontos számot kapunk eredményül. Ezek fontos szerepet kapnak a tanítási-vég fázisban.</para>
+<figure>
+    <title>NN</title>
+    <mediaobject>
+        <imageobject>
+        <imagedata fileref="img/NN.jpg" format="JPG"/>
+        </imageobject>
+    </mediaobject>
+</figure>
+<para>Ezeket a modelleket Perceptron modellnek nevezzük. Ezekről már korábban is hallottunk, de így közelebb került mindenkihez a fogalom.
+Ezen háttér birtokában felépítjük a kis MNIST python kódunkat. Elsőként a szükséges tensorflow és a MNIST data_set-et kellett beimportálni. Helyenként deprecated volt  így a TF v1. régi verzióval készült a példa. A data-set-et lokálisan kapta meg.
+Ezután kell egy olyan prepare() függvény, amely a saját képünket lekezeli is megfelelő formában visszaszolgáltatja a programunknak.
+Itt a cv2.imread végzi a beolvasást. Ezután, ha a kép nem 28x28-ba érkezik akkor átméretezzük. Ezután elkészítjük a szükséges normalizált mátrixot a megadott [?, 784] dimenzióra.
+</para>
+<programlisting language="python">
+    <![CDATA[
+def prepare():
+    filepath = "C:/Users/teaisawesome/Pictures/mnist/nulla.png";
+    IMG_SIZE = 28
+    img = cv2.imread(filepath, cv2.IMREAD_GRAYSCALE)
+    img = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
+    img = img.astype('float32')
+    img = img.reshape(28*28)
+    img = 255-img
+    img /= 255
+    return img
+    ]]>
+    </programlisting>
+<para> 
+A main függvénybe az mnist változó kapja meg a MNIST data-set-et. Ezután több különböző deklaráció található meg. Az x egy placeholder, amely majd a saját képünket fogja megkapni értékként. A W tartalmazza a sűlyokat. A b a valószínűséget hivatott megadni. 
+Ezután következik a tanulási fázis a Softmax és a GradientDescent optimalizációs függvény segítéségével.
+</para>
+<programlisting language="python">
+    <![CDATA[
+mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
+  x = tf.placeholder(tf.float32, [None, 784])
+  W = tf.Variable(tf.zeros([784, 10]))
+  b = tf.Variable(tf.zeros([10]))
+  y = tf.matmul(x, W) + b
+    
+  y_ = tf.placeholder(tf.float32, [None, 10])
+  cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y,labels=y_))
+  train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
+    ]]>
+    </programlisting>
+<para>A hálózat tanítása 1000x100-assával történik minden egyes tesztadatra.</para>
+<programlisting language="python">
+    <![CDATA[
+print("-- A halozat tanitasa")  
+  for i in range(1000):
+    batch_xs, batch_ys = mnist.train.next_batch(100)
+    sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
+    if i % 100 == 0:
+      print(i/10, "%")
+    ]]>
+    </programlisting>
+<para>Ezután kíváncsian várjuk, hogy milyen lett pontosan lett tanítva a hálózatunk. Ezt a accuracy változóba tároljuk a reduce_mean(...) segítéségvel.</para>
+<figure>
+    <title>Hálózat tanítása és tesztelése.</title>
+    <mediaobject>
+        <imageobject>
+        <imagedata fileref="img/eredmeny1.png" format="PNG"/>
+        </imageobject>
+    </mediaobject>
+</figure>
+<para>
+Mostmár kész vagyunk a modellel, be is tanítottuk így következhet a számfelismerés varázsa. Egy saját rajzolt 0-ast készítettem erre a célra, ezt fogja bemenetként kapni a program és megpróbálja felismerni a számot a betanított modellünk alapján. Először felkészítjük a képet a már előre megírt prepare() függvényünkkel. Ezt kirajzoltatjuk az imshow() matplot függvénnyel. Ezután a classification változóba “megjósoltatjuk”, hogy éppen melyik számjegyre adja vissza a maximumot. Ez egy objektum, amely tartalmazza a a max indexet, amely a jósolt számjegyet jelenti. Ezt kiprinteljük az output-ra és tá’dá’ sikerült.
+</para>
+<figure>
+    <title>Felismert számok.</title>
+    <mediaobject>
+        <imageobject>
+        <imagedata fileref="img/eredmeny2.png" format="PNG"/>
+        </imageobject>
+    </mediaobject>
+</figure>
+
+<programlisting language="java">
+    <![CDATA[
+
+    ]]>
+    </programlisting>
+<para> 
+</para>
+</section>
+<section>
+    <title>DEEP MNIST</title>
+    <para>
+    Ezen a példában a CNN-el vagyis Konvolúciós Neurális Hálózattal fogunk dolgozni. A konvolúciós hálókkal számos képfelismerési-, objektum detektáló- stb. feladat megvalósítható.
+Egy ilyen hálózat több layerből tevődik össze. A rétegek között nincs teljes kapcsolat hanem az előző réteg részhalmazt szolgáltat. Egy konvolúciós ablak segít végigmérni a bemeneti részhalmazokat. Ez az  ábrán jól látható. Ezen kívül fontos a Pooling layer, amely térbeli összevonást alkalmaz így csökken a dimenzió. Emiatt már mélyebb CNN layer is alkalmazható rá. Van Max-, Average-, Sum Pooling. Többnyire a Max-et használjuk.
+ReLu layer egy aktivációs réteg, amely segít 0-1 közötti non-linear értékek kiszámolását. Ez lényegében egy sigmoid. Fully Connected layer egy hagyományos neurális hálózat, amelynek minden neuronja hozzá van kötve a következő réteg további neuronjai hoz. Ez egy modellt képez amely után egy sigmoid vagy softmax aktivációs függvény van.
+Mindezeket összefoglalva láthatjuk ezen az ábrán:
+    </para>
+<figure>
+    <title>Convolutional Neural Network (CNN) ábra</title>
+    <mediaobject>
+        <imageobject>
+        <imagedata fileref="img/CNN.png" format="PNG"/>
+        </imageobject>
+    </mediaobject>
+</figure>
+<para>Most nézzük meg a python kódot illetve elemezgessük kicsit.</para>
+<para>A tanítás kb. 20 percig tartott. Mint ahogy látható az ábrán is 0.9928-as a pontosság, ami elég jónak számít. Ezután az előző feladatból átmásoltam a prepare() függvényt illetve átadtam a modellnek a következőképpen:</para>
+<programlisting language="python">
+    <![CDATA[
+print("-- A sajat kezi 0-asom felismerese, mutatom a szamot:")
+
+    img = prepare()
+    image = img
+
+    matplotlib.pyplot.imshow(image.reshape(28,28), cmap=matplotlib.pyplot.cm.binary)
+    #matplotlib.pyplot.savefig("8.png")  
+    matplotlib.pyplot.show()
+
+    classification = sess.run(tf.argmax(y_conv, 1), feed_dict={x: [image], keep_prob: 1.0})
+
+    print("-- Ezt a halozat ennek ismeri fel: ", classification[0])
+    print("----------------------------------------------------------")
+    ]]>
+    </programlisting>
+<figure>
+    <title>Hasonló eredmény a deep CNN változattal.</title>
+    <mediaobject>
+        <imageobject>
+        <imagedata fileref="img/deepresult.png" format="PNG"/>
+        </imageobject>
+    </mediaobject>
+</figure>
+<para>Az alábbi TensorBoard ábra jól szemlélteti az irányított gráfot illetve a tényleges deep CNN-hez tartozó layerek megléte. Nagyon jó elemző funkciók vannak benne. Az egyes elemeket fókuszba helyezve további részletet mutatott az elemre vonatkozóan.</para>
+<figure>
+    <title>TensorBoard gráf ábra.</title>
+    <mediaobject>
+        <imageobject>
+        <imagedata fileref="img/tensorboard.png" format="PNG"/>
+        </imageobject>
+    </mediaobject>
+</figure>
+
+</section>
+<section>
+    <title>CIFAR10</title>
+<para>A CIFAR10 dataset egy 6000 32x32px méretű képekből áll, amelyek 10 osztályba vannak sorolva.</para>
+<figure>
+    <title>CIFAR10 osztályok.</title>
+    <mediaobject>
+        <imageobject>
+        <imagedata fileref="img/cifarclasses.png" format="PNG"/>
+        </imageobject>
+    </mediaobject>
+</figure>
+<para>
+A feladat az volt, hogy a CIFAR adatbázist felhasználva a programunk képes legyen felismerni az általunk adott képeket. Fontos, hogy a képünk a 10 classba legyen sorolható.
+Ehhez ismét deep CNN-t használunk. Az elméleti hátteréhez tekints vissza a deep MNIST-es példához. A példához a Keras top-level TF könyvtárat használtam, amely jóval leegyszerüsödött a kód.
+A konstans deklarálás után betöltjük a CIFAR10 adatbázist. Majd teszteljük, hogy visszakaptuk-e a train-test párokat.
+</para>
+<programlisting language="python">
+    <![CDATA[
+IMG_CHANNELS = 3
+IMG_ROWS = 32
+IMG_COLS = 32
+BATCH_SIZE = 128
+NB_EPOCH = 20
+NB_CLASSES = 10
+VERBOSE = 1
+VALIDATION_SPLIT = 0.2
+OPTIM = RMSprop()
+
+(X_train, y_train), (X_test, y_test) = cifar10.load_data()
+print('X_train shape:', X_train.shape)
+print(X_train.shape[0], 'train samples')
+print(X_test.shape[0], 'test samples')
+    ]]>
+    </programlisting>
+<para>Ezután a train-test képeket hozzárendeljük a 10 osztályokhoz, amely a kimenetnél lesz fontos.
+</para>
+<programlisting language="python">
+    <![CDATA[
+Y_train = np_utils.to_categorical(y_train, NB_CLASSES)
+Y_test = np_utils.to_categorical(y_test, NB_CLASSES)
+    ]]>
+    </programlisting>
+<para>Lényegében az adatokat  normalizált vektorba töltjük vagyis felkészítjük az adatokat a feldolgozásra. (Lényegében pont az, amit én a prepare() függvényben csináltam)</para>
+<programlisting language="python">
+    <![CDATA[
+X_train = X_train.astype('float32')
+X_test = X_test.astype('float32')
+X_train /= 255
+X_test /= 255
+    ]]>
+    </programlisting>
+<para>Ezt követi a model elkészítése. A model változó most már egy lineáris layer-tároló lesz, ahova addolhatjuk az egyes deep CNN layereket. Láthatjuk, hogy elsőként Conv2D konvolúciós réteget definiálunk. Ezt 3x3 -as lépésekre osztjuk illetve shape-ként (32,32,3) van definiálva. Ezt követi egy ReLu aktivációs réteg. Ami után egy maxpooling-ot hajtunk végre a következő rétegben. Ezután egy 0.25 ratel random-kiválasztást alkalmaz az inputra, amellyel megelőzni kívánjuk az “overfitting” problémát. A Flatten() függvény “összenyomja” a beérkező inputshape-t. Pl.: (None, 64, 32, 32) => (None, 65536)
+A Dense(512) függvény egy egyszerű neurális háló réteg, amely 512 méretre redukálja az inputot. A többi layer tovább finomítja a az inputot, amely a Softmax layer megadja a jósolt kimenetet.
+</para>
+<programlisting language="python">
+    <![CDATA[
+model = Sequential()
+model.add(Conv2D(32, (3, 3), padding='same', input_shape=(IMG_ROWS, IMG_COLS, IMG_CHANNELS)))
+model.add(Activation('relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Dropout(0.25))
+model.add(Flatten())
+model.add(Dense(512))
+model.add(Activation('relu'))
+model.add(Dropout(0.5))
+model.add(Dense(NB_CLASSES))
+model.add(Activation('softmax'))
+model.summary()
+    ]]>
+    </programlisting>
+<figure>
+    <title>Modell szerkezete.</title>
+    <mediaobject>
+        <imageobject>
+        <imagedata fileref="img/model.png" format="PNG"/>
+        </imageobject>
+    </mediaobject>
+</figure>
+<para>A tanulás a compile() és fit() keras függvények segítségével történik. A compile függvény konfigurálja fel a modellünket a megadott funkcionális argumentumok segítségével. A fit() függvény tanítja fel a modellt. Itt a batch_size a lépésszámot jelenti az epochs pedig a max iterációt.</para>
+<programlisting language="python">
+    <![CDATA[
+model.compile(loss='categorical_crossentropy', optimizer=OPTIM, metrics=['accuracy'])
+model.fit(X_train, Y_train, batch_size=BATCH_SIZE, epochs=NB_EPOCH, validation_split=VALIDATION_SPLIT, verbose=VERBOSE)
+score = model.evaluate(X_test, Y_test, batch_size=BATCH_SIZE, verbose=VERBOSE)
+print("Test score:", score[0])
+print("Test accuracy:", score[1])
+    ]]>
+    </programlisting>
+<para>
+Ha a tanítás megtörtént akkor tesztelni tudjuk a hálózatunkat:
+
+Elsőként a open() függvény segítségével betöltjük a képet az állományrendszerből majd a resize() segítségével 32x32 méretűvé méretezzük. Ezután egy numpy array-t készítünk a képünkből majd ezt átdobjuk a model.predict_classes() függvénynek, amely visszaadja a megjósolt osztály, ahova tartozik a kép.
+</para>
+<programlisting language="python">
+    <![CDATA[
+from PIL import Image
+import numpy as np
+
+classes = ["airplane", "automobile", "bird", "cat", "deer", "dog", "frog", "horse", "ship", "truck"]
+
+img = Image.open("automobile.jpg")
+img = img.resize((32, 32))
+image = np.array(img)
+result = model.predict_classes(image.reshape((1, 32, 32, 3)))
+print(" ---------------------------------------------------")
+print("Kép: Bátfai Tanár Úr legendás matchboxa.")
+print( model.predict_proba(image.reshape(1, 32, 32, 3)) )
+print( classes[result[0]] )
+
+# [[0. 1. 0. 0. 0. 0. 0. 0. 0. 0.]]
+# automobile
+
+img = Image.open("deer.png")
+img = img.resize((32, 32))
+image = np.array(img)
+result = model.predict_classes(image.reshape((1, 32, 32, 3)))
+print(" ---------------------------------------------------")
+print("Kép: Szarvas")
+print( model.predict_proba(image.reshape(1, 32, 32, 3)) )
+print( classes[result[0]] )
+
+# [[0. 0. 0. 0. 1. 0. 0. 0. 0. 0.]]
+# deer
+
+img = Image.open("IFA.jpg")
+img = img.resize((32, 32))
+image = np.array(img)
+result = model.predict_classes(image.reshape((1, 32, 32, 3)))
+print(" ---------------------------------------------------")
+print("Kép: Saját választott képem egy IFA-ról.")
+print( model.predict_proba(image.reshape(1, 32, 32, 3)) )
+print( classes[result[0]] )
+
+# [[0. 0. 0. 0. 0. 0. 0. 0. 0. 1.]]
+# truck
+    ]]>
+    </programlisting>
+<figure>
+    <title>Automobile kép.</title>
+    <mediaobject>
+        <imageobject>
+        <imagedata fileref="img/automobile.jpg" format="JPG"/>
+        </imageobject>
+    </mediaobject>
+</figure>
+<figure>
+    <title>Szarvas kép.</title>
+    <mediaobject>
+        <imageobject>
+        <imagedata fileref="img/deer.png" format="PNG"/>
+        </imageobject>
+    </mediaobject>
+</figure>
+<figure>
+    <title>IFA kép.</title>
+    <mediaobject>
+        <imageobject>
+        <imagedata fileref="img/IFA.jpg" format="JPG"/>
+        </imageobject>
+    </mediaobject>
+</figure>
+<figure>
+    <title>CIFAR10 eredmény.</title>
+    <mediaobject>
+        <imageobject>
+        <imagedata fileref="img/cifarresult.png" format="PNG"/>
+        </imageobject>
+    </mediaobject>
+</figure>
+</section>
+<section>
+<title>Android telefonra TF objektum detektálója</title>
+<para>A feladat csak annyi volt, hogy próbáljuk a ki az Androidos TensorFlow objektum felismerő alkalmazását. Sokat szórakoztam vele, voltak egész jó és kevésbé jó eredmények.
+Itt az éppen a kutyánkon próbáltam ki és egész jól felismerte. 
+</para>
+<figure>
+    <title>Kutyánk felismerése.</title>
+    <mediaobject>
+        <imageobject>
+        <imagedata fileref="img/dog.jpg" format="JPG"/>
+        </imageobject>
+    </mediaobject>
+</figure>
+<para>Okosórát is elég jól feismerte.
+</para>
+<figure>
+    <title>Óra felismerése.</title>
+    <mediaobject>
+        <imageobject>
+        <imagedata fileref="img/watch.jpg" format="JPG"/>
+        </imageobject>
+    </mediaobject>
+</figure>
+<figure>
+    <title>Váza felismerése.</title>
+    <mediaobject>
+        <imageobject>
+        <imagedata fileref="img/vaza.jpg" format="JPG"/>
+        </imageobject>
+    </mediaobject>
+</figure>
+<para>Akadtak kevésbé jó eredmények. Sajnálatos módon nem sikerült felismernie az ukulelét, de még gitár se illett rá.</para>
+<figure>
+    <title>Ukulele felismerése.</title>
+    <mediaobject>
+        <imageobject>
+        <imagedata fileref="img/ukulele.jpg" format="JPG"/>
+        </imageobject>
+    </mediaobject>
+</figure>
+</section>
+
+</chapter>

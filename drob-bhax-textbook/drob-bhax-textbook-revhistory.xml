@@ -106,5 +106,93 @@
             Utolsó simítások a könyvön. Szerkesztések.
         </revremark>
     </revision>
+<revision>
+        <revnumber>0.2.1</revnumber>
+        <date>2019-09-15</date>
+        <authorinitials>dekrob</authorinitials>
+        <revremark>
+            Helló, Berners - Lee! olvasónapló kész.
+        </revremark>
+    </revision>
+<revision>
+        <revnumber>0.2.2</revnumber>
+        <date>2019-09-22</date>
+        <authorinitials>dekrob</authorinitials>
+        <revremark>
+            Helló, Arroway! csokor kész.
+        </revremark>
+    </revision>
+<revision>
+        <revnumber>0.2.3</revnumber>
+        <date>2019-09-29</date>
+        <authorinitials>dekrob</authorinitials>
+        <revremark>
+            Helló, Liskov! csokor kész.
+        </revremark>
+    </revision>
+<revision>
+        <revnumber>0.2.4</revnumber>
+        <date>2019-10-06</date>
+        <authorinitials>dekrob</authorinitials>
+        <revremark>
+            Helló, Mandelbrot! csokor kész.
+        </revremark>
+    </revision>
+<revision>
+        <revnumber>0.2.5</revnumber>
+        <date>2019-10-13</date>
+        <authorinitials>dekrob</authorinitials>
+        <revremark>
+            Helló, Chomsky! csokor kész.
+        </revremark>
+    </revision>
+<revision>
+        <revnumber>0.2.6</revnumber>
+        <date>2019-10-20</date>
+        <authorinitials>dekrob</authorinitials>
+        <revremark>
+            Helló, Stroustrup! csokor kész.
+        </revremark>
+    </revision>
+<revision>
+        <revnumber>0.2.7</revnumber>
+        <date>2019-11-03</date>
+        <authorinitials>dekrob</authorinitials>
+        <revremark>
+            Helló, Gödel! csokor kész.
+        </revremark>
+    </revision>
+<revision>
+        <revnumber>0.2.8</revnumber>
+        <date>2019-11-10</date>
+        <authorinitials>dekrob</authorinitials>
+        <revremark>
+            Helló, Valami! csokor kész.
+        </revremark>
+    </revision>
+<revision>
+        <revnumber>0.2.9</revnumber>
+        <date>2019-11-17</date>
+        <authorinitials>dekrob</authorinitials>
+        <revremark>
+            Helló, Lauda! csokor kész.
+        </revremark>
+    </revision>
+<revision>
+        <revnumber>0.2.10</revnumber>
+        <date>2019-11-24</date>
+        <authorinitials>dekrob</authorinitials>
+        <revremark>
+            Helló, Calvin! csokor kész.
+        </revremark>
+    </revision>
+<revision>
+        <revnumber>0.2.11</revnumber>
+        <date>2019-12-01</date>
+        <authorinitials>dekrob</authorinitials>
+        <revremark>
+            Végső simítások a könyvön!
+        </revremark>
+    </revision>
     
 </revhistory>
