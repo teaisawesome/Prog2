@@ -5,6 +5,14 @@
             <keyword/>
         </keywordset>
     </info>
+<section>
+<title>Interfészek. Kollekciók. Funkcionális nyelvi elemek. Lambda kifejezések.</title>
+<para>
+Az interface hivatott kiterjeszteni az absztrakciót. Ezek absztrakt osztályok, amelyek test nélküli metódusokat tartalmaz. Ezt az osztály más osztályok implementálják és kifejtik a metódusokat (ami kötelező). Az interfacek előnyei, hogy elrejtik a megvalósítást és csak a lényegi részt adja meg. Másik fontos előnye, hogy a többszörös öröklődést nem támogató nyelvekben is meg tudjuk ezt valósítani.
+Collection-ok vagy gyűjtemények olyan programozási eszközök, amelyek több különböző típusú adatokat tárol. Nem csak a tárolás a fontos, hanem az adatokkal végezhető műveletek így azokra különböző metódusokat szolgáltat. A Collectionek több adatszerkezete van: List, Deque, Set, Map. Műveleteik lehetnek: add(), remove(), size(), isEmpty(), contains(). 
+Lambda kifejezések olyan megvalósítást segítő kifejezés, amely jóval egyszerűbbé, olvashatóbbá teszi kódunkat. Használtatára egy példa: button.addActionListener(event -> System.out.println("gomb lenyomva")); A példában a button objektumra esemény feliratkozás történik, majd paraméterében megmondjuk mi is történjen. Az event egy helyettesítés, amely egy actionPerformed(Action event) speciális metódus. Ennek adjuk át a -> lambda operátor jobb oldalán álló kódot.
+</para>
+</section>
     <section>
         <title>Gengszterek</title>
         <para>A OOCWC projekt gengszterek rendezését kellett megnézni lambda kifejezéssel. Hasonló az STL map-es feladathoz itt is a jól bevált sort lambda kifejezéssel rendezünk. Ez az álábbi módon néz ki:
@@ -91,7 +99,7 @@ class Csapat implements Comparable<Csapat> {
         ]]>
         </programlisting>
 <para>
-Ahogy látható a kódból is implementáltuk a Comparable-t a class Csapatra. Ezután kifejtettük a compareTo(Csapat csapat). Itt az osztály attribútumként megadott ertek-et hasonlítjuk össze a paraméterként átadott Csapat objektum értékével. A már korábban leírt módon történik a visszatérés. A feladat lényegében kész, de szeretném még kiegészíteni a binaryShort API doksiban lévő kódjával és magyarázatával. (ezt megcsinálom csak újrateszem a gépet :D)
+Ahogy látható a kódból is implementáltuk a Comparable-t a class Csapatra. Ezután kifejtettük a compareTo(Csapat csapat). Itt az osztály attribútumként megadott ertek-et hasonlítjuk össze a paraméterként átadott Csapat objektum értékével. A már korábban leírt módon történik a visszatérés.
 </para>
 </section>
 <section>
